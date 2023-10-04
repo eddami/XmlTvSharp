@@ -16,6 +16,23 @@ You can install this library via NuGet Package Manager:
 Install-Package XmlTvSharp
 ```
 
+## Benchmark
+
+We tested the library using an XMLTV file featuring 19,804 channels and 1,979,805 programmes.
+
+```
+AMD Ryzen 5 3600, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 7.0.109
+[Host]     : .NET 7.0.9 (7.0.923.32301), X64 RyuJIT AVX2
+DefaultJob : .NET 7.0.9 (7.0.923.32301), X64 RyuJIT AVX2
+
+
+|       Method |    Mean |   Error |  StdDev |
+|------------- |--------:|--------:|--------:|
+| ReadAllAsync | 20.65 s | 0.293 s | 0.229 s |
+```
+
+
 ## Usage
 
 ### Basic Usage: Reading All XMLTV Elements
