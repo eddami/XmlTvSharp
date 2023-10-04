@@ -317,7 +317,7 @@ public class XmlTvReader : IDisposable
     {
         if (await reader.ReadAsync())
         {
-            if (reader is { NodeType: XmlNodeType.Element, Name: "value" })
+            if (reader is { NodeType: XmlNodeType.Element, Name: "value", IsEmptyElement: false })
             {
                 await reader.ReadAsync();
                 context.Programme!.StarRating = await reader.ReadContentAsStringAsync();
@@ -339,7 +339,7 @@ public class XmlTvReader : IDisposable
             {
                 switch (reader.Name)
                 {
-                    case "value":
+                    case "value" when !reader.IsEmptyElement:
                         await reader.ReadAsync();
                         rating.Value = await reader.ReadContentAsStringAsync();
                         break;
@@ -459,22 +459,22 @@ public class XmlTvReader : IDisposable
             {
                 switch (reader.Name)
                 {
-                    case "title":
+                    case "title" when !reader.IsEmptyElement:
                         await HandleTitleElement(reader, context);
                         break;
-                    case "sub-title":
+                    case "sub-title" when !reader.IsEmptyElement:
                         await HandleSubTitleElement(reader, context);
                         break;
-                    case "desc":
+                    case "desc" when !reader.IsEmptyElement:
                         await HandleDescriptionElement(reader, context);
                         break;
-                    case "date":
+                    case "date" when !reader.IsEmptyElement:
                         await HandleDateElement(reader, context);
                         break;
                     case "previously-shown":
                         HandlePreviouslyShownElement(reader, context);
                         break;
-                    case "actor":
+                    case "actor" when !reader.IsEmptyElement:
                         await HandleActorElement(reader, context);
                         break;
                     case "credits":
@@ -486,25 +486,25 @@ public class XmlTvReader : IDisposable
                     case "star-rating":
                         await HandleStarRatingElement(reader, context);
                         break;
-                    case "episode-num":
+                    case "episode-num" when !reader.IsEmptyElement:
                         await HandleEpisodeElement(reader, context);
                         break;
-                    case "language":
+                    case "language" when !reader.IsEmptyElement:
                         await HandleLanguageElement(reader, context);
                         break;
-                    case "category":
+                    case "category" when !reader.IsEmptyElement:
                         await HandleCategoryElement(reader, context);
                         break;
-                    case "country":
+                    case "country" when !reader.IsEmptyElement:
                         await HandleCountryElement(reader, context);
                         break;
-                    case "quality":
+                    case "quality" when !reader.IsEmptyElement:
                         await HandleQualityElement(reader, context);
                         break;
                     case "new":
                         HandleNewElement(context);
                         break;
-                    case "premiere":
+                    case "premiere" when !reader.IsEmptyElement:
                         await HandlePremiereElement(reader, context);
                         break;
                     case "icon":
@@ -552,7 +552,7 @@ public class XmlTvReader : IDisposable
             {
                 switch (reader.Name)
                 {
-                    case "display-name":
+                    case "display-name" when !reader.IsEmptyElement:
                         await HandleDisplayNameElement(reader, context);
                         break;
                     case "icon":
@@ -564,7 +564,7 @@ public class XmlTvReader : IDisposable
                         }
 
                         break;
-                    case "url":
+                    case "url" when !reader.IsEmptyElement:
                         context.Channel!.Urls ??= new List<XmlTvUrl>();
                         var url = await ReadUrlElement(reader);
                         context.Channel.Urls.Add(url);
@@ -629,7 +629,7 @@ public class XmlTvReader : IDisposable
 
         while (await reader.ReadAsync())
         {
-            if (reader.NodeType == XmlNodeType.Element)
+            if (reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
             {
                 switch (reader.Name)
                 {
