@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlTvSharp", "src\XmlTvSharp\XmlTvSharp.csproj", "{27CB4F27-705D-4B99-8683-F6C4CDDFFE4B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27CB4F27-705D-4B99-8683-F6C4CDDFFE4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27CB4F27-705D-4B99-8683-F6C4CDDFFE4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27CB4F27-705D-4B99-8683-F6C4CDDFFE4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27CB4F27-705D-4B99-8683-F6C4CDDFFE4B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

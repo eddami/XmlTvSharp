@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>10</LangVersion>
+        <Title>XmlTvSharp</Title>
+        <Authors>Mohamed Eddami</Authors>
+        <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/eddami/XmlTvSharp/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
+        <PackageTags>xmltv;c-sharp-library</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+</Project>
