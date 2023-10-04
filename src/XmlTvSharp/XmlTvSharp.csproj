@@ -10,9 +10,17 @@
         <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/eddami/XmlTvSharp/blob/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
-        <PackageTags>xmltv;c-sharp-library</PackageTags>
+        <PackageTags>xmltv;tv;epg;xml</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Description>A library designed for parsing TV program data in XMLTV format with a focus on asynchronous processing and high performance.</Description>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MinVer" Version="4.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
 
 </Project>
