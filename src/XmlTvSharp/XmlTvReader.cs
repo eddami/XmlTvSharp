@@ -375,9 +375,9 @@ public class XmlTvReader : IDisposable
         var date = reader.GetAttribute("start");
         if (DateTimeOffset.TryParseExact(date, StartStopFormats,
                 CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal, out var prevShownDate))
+                DateTimeStyles.AssumeUniversal, out var prevShownDate))
         {
-            context.Programme.PreviouslyShownDate = prevShownDate;
+            context.Programme.PreviouslyShownDate = TimeZoneInfo.ConvertTime(prevShownDate, context.Settings.TimeZone);
         }
     }
 
