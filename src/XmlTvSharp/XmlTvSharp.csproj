@@ -7,12 +7,14 @@
         <LangVersion>10</LangVersion>
         <Title>XmlTvSharp</Title>
         <Authors>Mohamed Eddami</Authors>
+        <Copyright>Copyright Mohamed Eddami</Copyright>
         <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
         <PackageTags>xmltv;tv;epg;xml</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Description>A high-performance, asynchronous XMLTV parser for TV program data.</Description>
         <MinVerTagPrefix>v</MinVerTagPrefix>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
