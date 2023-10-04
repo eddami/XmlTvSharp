@@ -23,5 +23,7 @@ public class XmlTvProgramme : IXmlTvElement
     public List<string>? Countries { get; set; }
     public string? Quality { get; set; }
     public bool IsNew { get; set; }
-    public Dictionary<string, string>? Premieres { get; set; }
+    public bool IsPremiere { get; set; }
+    public string? Premiere { get; set; }
+    public string? PremiereLanguage { get; set; }
 }

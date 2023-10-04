@@ -264,10 +264,14 @@ public class XmlTvReader : IDisposable
 
     private static async Task HandlePremiereElement(XmlReader reader, ParsingContext context)
     {
-        var lang = reader.GetAttribute("lang") ?? context.Settings.DefaultLanguage;
-        await reader.ReadAsync();
-        context.Programme!.Premieres ??= new Dictionary<string, string>();
-        context.Programme!.Premieres[lang] = await reader.ReadContentAsStringAsync();
+        context.Programme!.IsPremiere = true;
+        context.Programme.PremiereLanguage = reader.GetAttribute("lang");
+
+        if (!reader.IsEmptyElement)
+        {
+            await reader.ReadAsync();
+            context.Programme.Premiere = await reader.ReadContentAsStringAsync();
+        }
     }
 
     private static void HandleNewElement(ParsingContext context)
@@ -504,7 +508,7 @@ public class XmlTvReader : IDisposable
                     case "new":
                         HandleNewElement(context);
                         break;
-                    case "premiere" when !reader.IsEmptyElement:
+                    case "premiere":
                         await HandlePremiereElement(reader, context);
                         break;
                     case "icon":
