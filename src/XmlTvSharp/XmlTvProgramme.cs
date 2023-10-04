@@ -8,6 +8,7 @@ public class XmlTvProgramme : IXmlTvElement
     public Dictionary<string, string> Titles { get; set; } = new();
     public Dictionary<string, string>? SubTitles { get; set; }
     public Dictionary<string, string>? Descriptions { get; set; }
+    public List<XmlTvUrl>? Urls { get; set; }
     public List<string>? Actors { get; set; }
     public DateTimeOffset? Date { get; set; }
     public bool IsPreviouslyShown { get; set; }

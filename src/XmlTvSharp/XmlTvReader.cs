@@ -520,6 +520,12 @@ public class XmlTvReader : IDisposable
                         }
 
                         break;
+                    case "url" when !reader.IsEmptyElement:
+                        var url = await ReadUrlElement(reader);
+                        context.Programme!.Urls ??= new List<XmlTvUrl>();
+                        context.Programme.Urls.Add(url);
+
+                        break;
                 }
             }
 
