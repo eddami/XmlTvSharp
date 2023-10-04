@@ -1,3 +1,9 @@
+[![Build](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml/badge.svg)](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml)
+![GitHub tag (with filter)](https://img.shields.io/github/v/tag/eddami/XmlTvSharp)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/XmlTvSharp)
+![Nuget](https://img.shields.io/nuget/dt/XmlTvSharp)
+
 # XmlTvSharp
 
 A high-performance, asynchronous XMLTV parser for TV program data.
@@ -100,8 +106,10 @@ var settings = new XmlTvReaderSettings
 
 ## Contributing
 
-We welcome your contributions to this project. If you find a bug, have a feature request, or want to contribute in any other way, please open an issue or submit a pull request.
+We welcome your contributions to this project. If you find a bug, have a feature request, or want to contribute in any
+other way, please open an issue or submit a pull request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see
+the [LICENSE](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE) file for details.
