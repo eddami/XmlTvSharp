@@ -12,7 +12,7 @@
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
         <PackageTags>xmltv;c-sharp-library</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>1.0.0</Version>
+        <Description>A library designed for parsing TV program data in XMLTV format with a focus on asynchronous processing and high performance.</Description>
     </PropertyGroup>
 
 </Project>
