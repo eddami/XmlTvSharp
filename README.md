@@ -1,6 +1,6 @@
 # XmlTvSharp
 
-A library designed for parsing TV program data in XMLTV format with a focus on asynchronous processing and high performance.
+A high-performance, asynchronous XMLTV parser for TV program data.
 
 ## Installation
 
