@@ -104,4 +104,4 @@ We welcome your contributions to this project. If you find a bug, have a feature
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](http://github.com/eddami/XmlTvSharp) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE) file for details.

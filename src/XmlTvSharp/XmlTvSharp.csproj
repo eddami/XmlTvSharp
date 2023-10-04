@@ -8,7 +8,6 @@
         <Title>XmlTvSharp</Title>
         <Authors>Mohamed Eddami</Authors>
         <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/eddami/XmlTvSharp/blob/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
         <PackageTags>xmltv;tv;epg;xml</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
