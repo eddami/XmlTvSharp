@@ -132,7 +132,7 @@ public class XmlTvReader : IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (_reader.NodeType == XmlNodeType.Element)
+            if (_reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
             {
                 switch (_reader.Name)
                 {
@@ -188,7 +188,7 @@ public class XmlTvReader : IDisposable
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (reader.NodeType == XmlNodeType.Element)
+                if (reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
                 {
                     switch (reader.Name)
                     {
