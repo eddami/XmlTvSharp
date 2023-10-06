@@ -27,4 +27,5 @@ public class XmlTvProgramme : IXmlTvElement
     public bool IsPremiere { get; set; }
     public string? Premiere { get; set; }
     public string? PremiereLanguage { get; set; }
+    public string? OuterXml { get; set; }
 }

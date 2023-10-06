@@ -451,6 +451,13 @@ public class XmlTvReader : IDisposable
             };
             result?.Programmes.Add(currentProgramme);
             context.Programme = currentProgramme;
+
+            if (context.Settings.IncludeOuterXml)
+            {
+                var subTree = reader.ReadSubtree();
+                await subTree.ReadAsync();
+                currentProgramme.OuterXml = await subTree.ReadOuterXmlAsync();
+            }
         }
         else
         {
@@ -550,6 +557,13 @@ public class XmlTvReader : IDisposable
             };
             result?.Channels.Add(currentChannel);
             context.Channel = currentChannel;
+
+            if (context.Settings.IncludeOuterXml)
+            {
+                var subTree = reader.ReadSubtree();
+                await subTree.ReadAsync();
+                currentChannel.OuterXml = await subTree.ReadOuterXmlAsync();
+            }
         }
         else
         {

@@ -6,4 +6,5 @@ public class XmlTvChannel : IXmlTvElement
     public Dictionary<string, string?> DisplayNames { get; set; } = new();
     public List<XmlTvIcon>? Icons { get; set; }
     public List<XmlTvUrl>? Urls { get; set; }
+    public string? OuterXml { get; set; }
 }

@@ -40,4 +40,9 @@ public class XmlTvReaderSettings
     /// Gets or sets a value indicating whether to ignore programme elements during parsing. Default is false.
     /// </summary>
     public bool IgnoreProgrammes { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to include the outer XML of elements. Default is false.
+    /// </summary>
+    public bool IncludeOuterXml { get; set; } = false;
 }

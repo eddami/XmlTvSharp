@@ -96,7 +96,8 @@ var settings = new XmlTvReaderSettings
     DefaultLanguage = "en",
     TimeZone = TimeZoneInfo.Utc,
     IgnoreChannels = false,
-    IgnoreProgrammes = false
+    IgnoreProgrammes = false,
+    IncludeOuterXml = false
 };
 ```
 
@@ -108,6 +109,7 @@ var settings = new XmlTvReaderSettings
 - `TimeZone`: Time zone to convert programme start and stop times. Default is UTC.
 - `IgnoreChannels`: Set to true to ignore channel elements during parsing.
 - `IgnoreProgrammes`: Set to true to ignore programme elements during parsing.
+- `IncludeOuterXml`: Set to true to include the outer XML of elements during parsing.
 
 **Example Usage:**
 
