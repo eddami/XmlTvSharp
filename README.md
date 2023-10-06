@@ -32,7 +32,6 @@ DefaultJob : .NET 7.0.9 (7.0.923.32301), X64 RyuJIT AVX2
 | ReadAllAsync | 20.65 s | 0.293 s | 0.229 s |
 ```
 
-
 ## Usage
 
 ### Basic Usage: Reading All XMLTV Elements
@@ -92,7 +91,7 @@ XmlTvReaderSettings allows customization of the parsing behavior. Here are the d
 var settings = new XmlTvReaderSettings
 {
     FilterByChannelId = null,
-    FilterByProgrammeChannelId = false,
+    FilterByProgrammeChannelId = null,
     FilterByProgrammeTime = null,
     DefaultLanguage = "en",
     TimeZone = TimeZoneInfo.Utc,
@@ -101,8 +100,9 @@ var settings = new XmlTvReaderSettings
 };
 ```
 
-- `FilterByChannelId`: A function to filter channels by their IDs.
-- `FilterByProgrammeChannelId`: A function to filter programmes by their channel IDs.
+- `FilterByChannelId`: A function to filter all elements by their channel IDs.
+- `FilterByProgrammeChannelId`: A function to filter programme elements only by their channel IDs. If not set, `FilterByChannelId` is
+  used instead.
 - `FilterByProgrammeTime`: A function to filter programmes by their start and stop times.
 - `DefaultLanguage`: Default language to use if language information is not available in the XML data.
 - `TimeZone`: Time zone to convert programme start and stop times. Default is UTC.

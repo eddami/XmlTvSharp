@@ -6,12 +6,13 @@ namespace XmlTvSharp;
 public class XmlTvReaderSettings
 {
     /// <summary>
-    /// Gets or sets a function to filter channels by their IDs during parsing.
+    /// Gets or sets a function to filter all elements by their channel IDs during parsing.
     /// </summary>
     public Func<string, bool>? FilterByChannelId { get; set; }
 
     /// <summary>
     /// Gets or sets a function to filter programmes by their channel IDs during parsing.
+    /// If not set, <see cref="FilterByChannelId"/> is used instead.
     /// </summary>
     public Func<string, bool>? FilterByProgrammeChannelId { get; set; }
 
