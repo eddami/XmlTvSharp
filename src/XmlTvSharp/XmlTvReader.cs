@@ -26,14 +26,7 @@ public class XmlTvReader : IDisposable
             throw new ArgumentNullException(nameof(path));
         }
 
-        _reader = XmlReader.Create(path, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        _reader = CreateXmlReader(path);
 
         _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
     }
@@ -47,14 +40,7 @@ public class XmlTvReader : IDisposable
     {
         if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-        _reader = XmlReader.Create(stream, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        _reader = CreateXmlReader(stream);
 
         _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
     }
@@ -68,14 +54,7 @@ public class XmlTvReader : IDisposable
     {
         if (textReader == null) throw new ArgumentNullException(nameof(textReader));
 
-        _reader = XmlReader.Create(textReader, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        _reader = CreateXmlReader(textReader);
 
         _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
     }
@@ -95,14 +74,7 @@ public class XmlTvReader : IDisposable
             throw new ArgumentNullException(nameof(path));
         }
 
-        var reader = XmlReader.Create(path, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        var reader = CreateXmlReader(path);
 
         return InternalReadAllAsync(reader, settings, cancellationToken);
     }
@@ -119,14 +91,7 @@ public class XmlTvReader : IDisposable
     {
         if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-        var reader = XmlReader.Create(stream, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        var reader = CreateXmlReader(stream);
 
         return InternalReadAllAsync(reader, settings, cancellationToken);
     }
@@ -143,14 +108,7 @@ public class XmlTvReader : IDisposable
     {
         if (textReader == null) throw new ArgumentNullException(nameof(textReader));
 
-        var reader = XmlReader.Create(textReader, new XmlReaderSettings
-        {
-            IgnoreWhitespace = true,
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
+        var reader = CreateXmlReader(textReader);
 
         return InternalReadAllAsync(reader, settings, cancellationToken);
     }
@@ -739,6 +697,42 @@ public class XmlTvReader : IDisposable
         public XmlTvProgramme? Programme { get; set; }
         public XmlTvChannel? Channel { get; set; }
         public XmlTvReaderSettings Settings { get; set; }
+    }
+
+    private static XmlReader CreateXmlReader(string path)
+    {
+        return XmlReader.Create(path, new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Ignore,
+            IgnoreWhitespace = true,
+            IgnoreComments = true,
+            IgnoreProcessingInstructions = true,
+            Async = true
+        });
+    }
+
+    private static XmlReader CreateXmlReader(Stream stream)
+    {
+        return XmlReader.Create(stream, new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Ignore,
+            IgnoreWhitespace = true,
+            IgnoreComments = true,
+            IgnoreProcessingInstructions = true,
+            Async = true
+        });
+    }
+
+    private static XmlReader CreateXmlReader(TextReader reader)
+    {
+        return XmlReader.Create(reader, new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Ignore,
+            IgnoreWhitespace = true,
+            IgnoreComments = true,
+            IgnoreProcessingInstructions = true,
+            Async = true
+        });
     }
 
     public void Dispose()
