@@ -47,12 +47,12 @@ var cancellationToken = new CancellationToken();
 // Customize the parsing behaviour
 var settings = new XmlTvReaderSettings();
 
-// Read all TV channels and programs asynchronously
+// Read all TV channels and programmes asynchronously
 var result = await XmlTvReader.ReadAllAsync(xmlFilePath, settings, cancellationToken);
 
-// Access the parsed TV channels and programs
+// Access the parsed TV channels and programmes
 var channels = result.Channels;
-var programs = result.Programmes;
+var programmes = result.Programmes;
 ```
 
 ### Basic Usage: Reading XMLTV Elements Sequentially
@@ -92,6 +92,7 @@ XmlTvReaderSettings allows customization of the parsing behavior. Here are the d
 var settings = new XmlTvReaderSettings
 {
     FilterByChannelId = null,
+    FilterByProgrammeChannelId = false,
     FilterByProgrammeTime = null,
     DefaultLanguage = "en",
     TimeZone = TimeZoneInfo.Utc,
@@ -101,11 +102,12 @@ var settings = new XmlTvReaderSettings
 ```
 
 - `FilterByChannelId`: A function to filter channels by their IDs.
-- `FilterByProgrammeTime`: A function to filter programs by their start and stop times.
+- `FilterByProgrammeChannelId`: A function to filter programmes by their channel IDs.
+- `FilterByProgrammeTime`: A function to filter programmes by their start and stop times.
 - `DefaultLanguage`: Default language to use if language information is not available in the XML data.
-- `TimeZone`: Time zone to convert program start and stop times. Default is UTC.
+- `TimeZone`: Time zone to convert programme start and stop times. Default is UTC.
 - `IgnoreChannels`: Set to true to ignore channel elements during parsing.
-- `IgnoreProgrammes`: Set to true to ignore program elements during parsing.
+- `IgnoreProgrammes`: Set to true to ignore programme elements during parsing.
 
 **Example Usage:**
 
@@ -117,7 +119,7 @@ var settings = new XmlTvReaderSettings
     DefaultLanguage = "fr", // Set default language to French
     TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"), // Set time zone to EST
     IgnoreChannels = false, // Do not ignore channel elements
-    IgnoreProgrammes = true // Ignore program elements during parsing
+    IgnoreProgrammes = true // Ignore programme elements during parsing
 };
 ```
 

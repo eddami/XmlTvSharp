@@ -428,7 +428,7 @@ public class XmlTvReader : IDisposable
     {
         var skip = false;
 
-        var channelIdFilter = context.Settings.FilterByChannelId;
+        var channelIdFilter = context.Settings.FilterByProgrammeChannelId;
         var timeFilter = context.Settings.FilterByProgrammeTime;
 
         var startString = reader.GetAttribute("start");

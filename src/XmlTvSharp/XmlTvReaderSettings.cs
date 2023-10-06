@@ -11,6 +11,11 @@ public class XmlTvReaderSettings
     public Func<string, bool>? FilterByChannelId { get; set; }
 
     /// <summary>
+    /// Gets or sets a function to filter programmes by their channel IDs during parsing.
+    /// </summary>
+    public Func<string, bool>? FilterByProgrammeChannelId { get; set; }
+
+    /// <summary>
     /// Gets or sets a function to filter programmes by their start and stop times during parsing.
     /// </summary>
     public Func<DateTimeOffset, DateTimeOffset, bool>? FilterByProgrammeTime { get; set; }
