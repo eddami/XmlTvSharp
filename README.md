@@ -102,8 +102,11 @@ var settings = new XmlTvReaderSettings
 ```
 
 - `FilterByChannelId`: A function to filter all elements by their channel IDs.
-- `FilterByProgrammeChannelId`: A function to filter programme elements only by their channel IDs. If not set, `FilterByChannelId` is
-  used instead.
+- `FilterByProgrammeChannelId`: A function to filter programme elements by their channel IDs.
+
+**Note:** When both `FilterByChannelId` and `FilterByProgrammeChannelId` are set, `FilterByProgrammeChannelId` takes
+precedence over `FilterByChannelId` for filtering programme elements by their channel IDs.
+
 - `FilterByProgrammeTime`: A function to filter programmes by their start and stop times.
 - `DefaultLanguage`: Default language to use if language information is not available in the XML data.
 - `TimeZone`: Time zone to convert programme start and stop times. Default is UTC.
@@ -111,17 +114,22 @@ var settings = new XmlTvReaderSettings
 - `IgnoreProgrammes`: Set to true to ignore programme elements during parsing.
 - `IncludeOuterXml`: Set to true to include the outer XML of elements during parsing.
 
+**Warning:** Setting `IncludeOuterXml` to `true` will cause the parser to allocate an extra `XmlReader` instance,
+potentially impacting performance.
+
 **Example Usage:**
 
 ```csharp
 var settings = new XmlTvReaderSettings
 {
     FilterByChannelId = channelId => channelId.StartsWith("custom_"),
+    FilterByProgrammeChannelId = channelId => channelId.StartsWith("custom_programme_"),
     FilterByProgrammeTime = (startTime, endTime) => startTime.DayOfWeek == DayOfWeek.Monday && endTime.Hour < 18,
     DefaultLanguage = "fr", // Set default language to French
     TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"), // Set time zone to EST
     IgnoreChannels = false, // Do not ignore channel elements
-    IgnoreProgrammes = true // Ignore programme elements during parsing
+    IgnoreProgrammes = true, // Ignore programme elements during parsing
+    IncludeOuterXml = true // Include outer XML of elements during parsing
 };
 ```
 
