@@ -128,9 +128,14 @@ public class XmlTvReader : IDisposable
             return default;
         }
 
-        while (await _reader.ReadAsync())
+        while (!_reader.EOF)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (_reader is not { NodeType: XmlNodeType.Element, IsEmptyElement: false, Name: "channel" or "programme" })
+            {
+                await _reader.ReadAsync();
+            }
 
             if (_reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
             {
@@ -184,9 +189,15 @@ public class XmlTvReader : IDisposable
 
         try
         {
-            while (await reader.ReadAsync())
+            while (!reader.EOF)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                if (reader is not
+                    { NodeType: XmlNodeType.Element, IsEmptyElement: false, Name: "channel" or "programme" })
+                {
+                    await reader.ReadAsync();
+                }
 
                 if (reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
                 {
@@ -412,9 +423,9 @@ public class XmlTvReader : IDisposable
 
             if (context.Settings.IncludeOuterXml)
             {
-                var subTree = reader.ReadSubtree();
-                await subTree.ReadAsync();
-                currentProgramme.OuterXml = await subTree.ReadOuterXmlAsync();
+                currentProgramme.OuterXml = await reader.ReadOuterXmlAsync();
+                reader = CreateXmlReader(new StringReader(currentProgramme.OuterXml));
+                await reader.ReadAsync();
             }
         }
         else
@@ -518,9 +529,9 @@ public class XmlTvReader : IDisposable
 
             if (context.Settings.IncludeOuterXml)
             {
-                var subTree = reader.ReadSubtree();
-                await subTree.ReadAsync();
-                currentChannel.OuterXml = await subTree.ReadOuterXmlAsync();
+                currentChannel.OuterXml = await reader.ReadOuterXmlAsync();
+                reader = CreateXmlReader(new StringReader(currentChannel.OuterXml));
+                await reader.ReadAsync();
             }
         }
         else
