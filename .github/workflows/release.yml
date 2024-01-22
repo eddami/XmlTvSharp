@@ -22,6 +22,6 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build --verbosity=normal
       - name: Pack
-        run: dotnet pack .\src\XmlTvSharp\XmlTvSharp.csproj -c Release --no-build
+        run: dotnet pack ./src/XmlTvSharp/XmlTvSharp.csproj -c Release --no-build
       - name: Push to Nuget
         run: dotnet nuget push bin/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
