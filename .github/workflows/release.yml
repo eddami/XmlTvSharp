@@ -20,7 +20,7 @@ jobs:
       - name: Build
         run: dotnet build -c Release
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test -c Release --no-build --verbosity=normal
       - name: Pack
         run: dotnet pack .\src\XmlTvSharp\XmlTvSharp.csproj -c Release --no-build
       - name: Push to Nuget
