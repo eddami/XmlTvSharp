@@ -8,7 +8,7 @@
 
     <channel id="channel2">
         <display-name lang="en">Channel 2</display-name>
-        <icon src="channel2_icon.png" height="50" width="50"/>
+        <icon src="" height="50" width="50"/>
         <url system="xmltv">http://example.com/channel2</url>
     </channel>
 

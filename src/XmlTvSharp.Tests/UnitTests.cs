@@ -87,6 +87,62 @@ public class UnitTests
 
         Assert.Null(nullElement);
     }
+    
+    [Fact]
+    public async Task ReadAsync_ValidXmlTvContentFromStringReader_ParsesSuccessfully()
+    {
+        // Arrange
+        const string xmlFilePath = "./Data/epg.xml";
+        var xmlContent = await File.ReadAllTextAsync(xmlFilePath);
+        var stringReader = new StringReader(xmlContent);
+        using var reader = new XmlTvReader(stringReader);
+
+        // Act
+        var channel = await reader.ReadAsync();
+
+        await reader.ReadAsync();
+        var programme = await reader.ReadAsync();
+
+        await reader.ReadAsync();
+        var nullElement = await reader.ReadAsync();
+
+        // Assert
+        Assert.IsType<XmlTvChannel>(channel);
+        AssertValidXmlTvChannel((XmlTvChannel)channel);
+
+        Assert.IsType<XmlTvProgramme>(programme);
+        AssertValidXmlTvProgramme((XmlTvProgramme)programme);
+
+        Assert.Null(nullElement);
+    }
+    
+    [Fact]
+    public async Task ReadAsync_ValidXmlTvContentFromStream_ParsesSuccessfully()
+    {
+        // Arrange
+        const string xmlFilePath = "./Data/epg.xml";
+        var xmlContent = await File.ReadAllTextAsync(xmlFilePath);
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(xmlContent));
+        using var reader = new XmlTvReader(stream);
+
+        // Act
+        var channel = await reader.ReadAsync();
+
+        await reader.ReadAsync();
+        var programme = await reader.ReadAsync();
+
+        await reader.ReadAsync();
+        var nullElement = await reader.ReadAsync();
+
+        // Assert
+        Assert.IsType<XmlTvChannel>(channel);
+        AssertValidXmlTvChannel((XmlTvChannel)channel);
+
+        Assert.IsType<XmlTvProgramme>(programme);
+        AssertValidXmlTvProgramme((XmlTvProgramme)programme);
+
+        Assert.Null(nullElement);
+    }
 
     [Fact]
     public async Task ReadAllAsync_IgnoreChannels_ValidXmlTvFile_ParsesSuccessfully()

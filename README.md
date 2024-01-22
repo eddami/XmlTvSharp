@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/XmlTvSharp)](https://www.nuget.org/packages/XmlTvSharp)
 [![Nuget](https://img.shields.io/nuget/dt/XmlTvSharp)](https://www.nuget.org/packages/XmlTvSharp)
+[![Coverage Status](https://coveralls.io/repos/github/eddami/XmlTvSharp/badge.svg?branch=main)](https://coveralls.io/github/eddami/XmlTvSharp?branch=main)
 
 # XmlTvSharp
 
