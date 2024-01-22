@@ -24,4 +24,4 @@ jobs:
       - name: Pack
         run: dotnet pack ./src/XmlTvSharp/XmlTvSharp.csproj -c Release --no-build
       - name: Push to Nuget
-        run: dotnet nuget push bin/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+        run: dotnet nuget push ./src/XmlTvSharp/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
