@@ -4,34 +4,24 @@ on:
   push:
     tags:
       - '*.*.*'
+
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup dotnet 6.0
+      - name: Setup dotnet 8.0
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'
-      - name: Build and Test
-        run: ./Build.ps1
-        shell: pwsh
-      - name: Push to NuGet
-        env:
-          NUGET_URL: https://api.nuget.org/v3/index.json
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: ./Push.ps1
-        shell: pwsh
-      - name: Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifacts
-          path: artifacts/**/*
-          retention-days: 7
+          dotnet-version: '8.0.x'
+      - name: Build
+        run: dotnet build -c Release
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Pack
+        run: dotnet pack .\src\XmlTvSharp\XmlTvSharp.csproj -c Release --no-build
+      - name: Push to Nuget
+        run: dotnet nuget push bin/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
