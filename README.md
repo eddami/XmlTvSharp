@@ -1,5 +1,5 @@
-[![Build](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml/badge.svg)](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml)
-[![GitHub tag (with filter)](https://img.shields.io/github/v/tag/eddami/XmlTvSharp)](https://github.com/eddami/XmlTvSharp/tags)
+[![Build](https://github.com/eddami/XmlTvSharp/actions/workflows/build.yml/badge.svg)](https://github.com/eddami/XmlTvSharp/actions/workflows/build.yml)
+[![Release](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml/badge.svg)](https://github.com/eddami/XmlTvSharp/actions/workflows/release.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/eddami/XmlTvSharp/blob/main/LICENSE)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/XmlTvSharp)](https://www.nuget.org/packages/XmlTvSharp)
 [![Nuget](https://img.shields.io/nuget/dt/XmlTvSharp)](https://www.nuget.org/packages/XmlTvSharp)
