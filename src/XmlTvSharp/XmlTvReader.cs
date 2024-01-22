@@ -206,6 +206,7 @@ public class XmlTvReader : IDisposable
                         case "channel":
                             if (context.Settings.IgnoreChannels)
                             {
+                                await reader.ReadAsync();
                                 break;
                             }
 
