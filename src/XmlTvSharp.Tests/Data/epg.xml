@@ -1,0 +1,57 @@
+<tv>
+    <!-- Channel Information -->
+    <channel id="channel1">
+        <display-name lang="en">Channel 1</display-name>
+        <icon src="channel1_icon.png" height="50" width="50"/>
+        <url system="xmltv">http://example.com/channel1</url>
+    </channel>
+
+    <channel id="channel2">
+        <display-name lang="en">Channel 2</display-name>
+        <icon src="channel2_icon.png" height="50" width="50"/>
+        <url system="xmltv">http://example.com/channel2</url>
+    </channel>
+
+    <!-- Program Information -->
+    <programme start="20220522120000" stop="20220522130000" channel="channel1">
+        <title lang="en">Program 1</title>
+        <sub-title lang="en">Subtitle 1</sub-title>
+        <desc lang="en">Description of Program 1</desc>
+        <date>20220522</date>
+        <previously-shown channel="channel1" start="20220521120000"/>
+        <actor lang="en">Actor 1</actor>
+        <credits>
+            <director>Director 1</director>
+            <actor role="Lead">Lead Actor 1</actor>
+            <writer>Writer 1</writer>
+            <adapter>Adapter 1</adapter>
+            <producer>Producer 1</producer>
+            <composer>Composer 1</composer>
+            <editor>Editor 1</editor>
+            <presenter>Presenter 1</presenter>
+            <commentator>Commentator 1</commentator>
+            <guest role="Special">Special Guest 1</guest>
+        </credits>
+        <rating system="MPAA">
+            <value>PG-13</value>
+            <icon src="mpaa_icon.png"/>
+        </rating>
+        <star-rating>
+            <value>4.5</value>
+        </star-rating>
+        <episode-num system="onscreen">S01E01</episode-num>
+        <language>English</language>
+        <category>Entertainment</category>
+        <country>USA</country>
+        <quality>HDTV</quality>
+        <new/>
+        <premiere lang="en">Premiere of Program 1</premiere>
+        <icon src="program1_icon.png"/>
+        <url system="official">http://example.com/program1</url>
+    </programme>
+
+    <programme start="20220523130000 +0000" stop="20220523140000 +0000" channel="channel2">
+        <title>Program 2</title>
+        <desc>Description for Program 2</desc>
+    </programme>
+</tv>
