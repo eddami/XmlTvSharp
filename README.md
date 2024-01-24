@@ -35,7 +35,7 @@ DefaultJob : .NET 7.0.9 (7.0.923.32301), X64 RyuJIT AVX2
 
 ## Usage
 
-### Basic Usage: Reading All XMLTV Elements
+### Reading All XMLTV Elements
 
 ```csharp
 // Specify the path to the XML file containing TV program information
@@ -55,7 +55,7 @@ var channels = result.Channels;
 var programmes = result.Programmes;
 ```
 
-### Basic Usage: Reading XMLTV Elements Sequentially
+### Reading XMLTV Elements Sequentially
 
 ```csharp
 // Specify the path to the XML file containing TV program information
