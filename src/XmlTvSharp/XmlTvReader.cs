@@ -1,764 +1,239 @@
-using System.Globalization;
 using System.Xml;
+using XmlTvSharp.Models;
+using XmlTvSharp.Parsing;
 
 namespace XmlTvSharp;
 
 /// <summary>
-/// Represents a reader for parsing XML data containing TV program information in XMLTV format.
+///     Reads complete XMLTV documents and supported top-level XMLTV elements from XML streams.
 /// </summary>
-public class XmlTvReader : IDisposable
+public sealed class XmlTvReader : IDisposable
 {
-    private static readonly string[] StartStopFormats = { "yyyyMMddHmmss zzz", "yyyyMMddHmmss" };
-    private static readonly string[] DateFormats = { "yyyyMMdd", "yyyy" };
-
+    private readonly XmlTvParser _parser;
     private readonly XmlReader _reader;
-    private readonly ParsingContext _context;
+    private bool _disposed;
 
-    /// <summary>
-    /// Initializes a new instance of the XmlTvReader class with the specified XML file path and optional settings.
-    /// </summary>
-    /// <param name="path">The path to the XML file containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    public XmlTvReader(string path, XmlTvReaderSettings? settings = default)
+    /// <summary>Initializes a reader for a file path.</summary>
+    /// <param name="path">The XMLTV file path.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    public XmlTvReader(string path, XmlTvReaderOptions? options = null, XmlTvReadFilter? filter = null)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
-            throw new ArgumentNullException(nameof(path));
+            throw new ArgumentException("Path cannot be empty or whitespace.", nameof(path));
         }
 
-        _reader = CreateXmlReader(path);
-
-        _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
+        _reader = XmlTvReaderFactory.Create(path);
+        _parser = new XmlTvParser(_reader, options, filter);
     }
 
-    /// <summary>
-    /// Initializes a new instance of the XmlTvReader class with the specified stream and optional settings.
-    /// </summary>
-    /// <param name="stream">The stream containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    public XmlTvReader(Stream stream, XmlTvReaderSettings? settings = default)
+    /// <summary>Initializes a reader for a stream.</summary>
+    /// <param name="stream">The XMLTV stream.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    /// <param name="leaveOpen">Whether to leave <paramref name="stream" /> open when this reader is disposed.</param>
+    public XmlTvReader(
+        Stream stream,
+        XmlTvReaderOptions? options = null,
+        XmlTvReadFilter? filter = null,
+        bool leaveOpen = false)
     {
-        if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-        _reader = CreateXmlReader(stream);
-
-        _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
+        _reader = XmlTvReaderFactory.Create(stream ?? throw new ArgumentNullException(nameof(stream)), leaveOpen);
+        _parser = new XmlTvParser(_reader, options, filter);
     }
 
-    /// <summary>
-    /// Initializes a new instance of the XmlTvReader class with the specified TextReader and optional settings.
-    /// </summary>
-    /// <param name="textReader">The TextReader containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    public XmlTvReader(TextReader textReader, XmlTvReaderSettings? settings = default)
+    /// <summary>Initializes a reader for a text reader.</summary>
+    /// <param name="textReader">The XMLTV text reader.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    /// <param name="leaveOpen">Whether to leave <paramref name="textReader" /> open when this reader is disposed.</param>
+    public XmlTvReader(
+        TextReader textReader,
+        XmlTvReaderOptions? options = null,
+        XmlTvReadFilter? filter = null,
+        bool leaveOpen = false)
     {
-        if (textReader == null) throw new ArgumentNullException(nameof(textReader));
-
-        _reader = CreateXmlReader(textReader);
-
-        _context = new ParsingContext(settings ?? new XmlTvReaderSettings());
+        _reader = XmlTvReaderFactory.Create(textReader ?? throw new ArgumentNullException(nameof(textReader)),
+            leaveOpen);
+        _parser = new XmlTvParser(_reader, options, filter);
     }
 
-    /// <summary>
-    /// Reads all XMLTV elements from the specified XML file path asynchronously and returns the parsed result.
-    /// </summary>
-    /// <param name="path">The path to the XML file containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
-    /// <returns>An instance of XmlTvResult containing the parsed TV channels and programs.</returns>
-    public static Task<XmlTvResult> ReadAllAsync(string path, XmlTvReaderSettings? settings = default,
-        CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            throw new ArgumentNullException(nameof(path));
-        }
-
-        var reader = CreateXmlReader(path);
-
-        return InternalReadAllAsync(reader, settings, cancellationToken);
-    }
-
-    /// <summary>
-    /// Reads all XMLTV elements from the specified stream asynchronously and returns the parsed result.
-    /// </summary>
-    /// <param name="stream">The stream containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
-    /// <returns>An instance of XmlTvResult containing the parsed TV channels and programs.</returns>
-    public static Task<XmlTvResult> ReadAllAsync(Stream stream, XmlTvReaderSettings? settings = default,
-        CancellationToken cancellationToken = default)
-    {
-        if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-        var reader = CreateXmlReader(stream);
-
-        return InternalReadAllAsync(reader, settings, cancellationToken);
-    }
-
-    /// <summary>
-    /// Reads all XMLTV elements from the specified TextReader asynchronously and returns the parsed result.
-    /// </summary>
-    /// <param name="textReader">The TextReader containing TV program information in XMLTV format.</param>
-    /// <param name="settings">Optional settings for customizing the XMLTV parsing behavior.</param>
-    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
-    /// <returns>An instance of XmlTvResult containing the parsed TV channels and programs.</returns>
-    public static Task<XmlTvResult> ReadAllAsync(TextReader textReader, XmlTvReaderSettings? settings = default,
-        CancellationToken cancellationToken = default)
-    {
-        if (textReader == null) throw new ArgumentNullException(nameof(textReader));
-
-        var reader = CreateXmlReader(textReader);
-
-        return InternalReadAllAsync(reader, settings, cancellationToken);
-    }
-
-    /// <summary>
-    /// Reads the next XMLTV element asynchronously from the XML data and returns it.
-    /// </summary>
-    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
-    /// <returns>
-    /// An instance of the interface IXmlTvElement representing the next XMLTV element read from the data.
-    /// Returns null if the end of the XML data is reached.
-    /// </returns>
-    public async Task<IXmlTvElement?> ReadAsync(CancellationToken cancellationToken = default)
-    {
-        if (_context.Settings is { IgnoreChannels: true, IgnoreProgrammes: true })
-        {
-            return default;
-        }
-
-        while (!_reader.EOF)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (_reader is not { NodeType: XmlNodeType.Element, IsEmptyElement: false, Name: "channel" or "programme" })
-            {
-                await _reader.ReadAsync();
-            }
-
-            if (_reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
-            {
-                switch (_reader.Name)
-                {
-                    case "channel":
-                        if (_context.Settings.IgnoreChannels)
-                        {
-                            await _reader.ReadAsync();
-                            break;
-                        }
-
-                        await HandleChannelElement(_reader, _context);
-                        if (_context.Channel != null)
-                        {
-                            return _context.Channel;
-                        }
-
-                        break;
-                    case "programme":
-                        if (_context.Settings.IgnoreProgrammes)
-                        {
-                            return default;
-                        }
-
-                        await HandleProgrammeElement(_reader, _context);
-                        if (_context.Programme != null)
-                        {
-                            return _context.Programme;
-                        }
-
-                        break;
-                }
-            }
-        }
-
-        return default;
-    }
-
-    private static async Task<XmlTvResult> InternalReadAllAsync(XmlReader reader,
-        XmlTvReaderSettings? settings = default,
-        CancellationToken cancellationToken = default)
-    {
-        var result = new XmlTvResult();
-
-        var context = new ParsingContext(settings ?? new XmlTvReaderSettings());
-
-        if (context.Settings is { IgnoreChannels: true, IgnoreProgrammes: true })
-        {
-            return result;
-        }
-
-        try
-        {
-            while (!reader.EOF)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (reader is not
-                    { NodeType: XmlNodeType.Element, IsEmptyElement: false, Name: "channel" or "programme" })
-                {
-                    await reader.ReadAsync();
-                }
-
-                if (reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
-                {
-                    switch (reader.Name)
-                    {
-                        case "channel":
-                            if (context.Settings.IgnoreChannels)
-                            {
-                                await reader.ReadAsync();
-                                break;
-                            }
-
-                            await HandleChannelElement(reader, context, result);
-                            break;
-                        case "programme":
-                            if (context.Settings.IgnoreProgrammes)
-                            {
-                                return result;
-                            }
-
-                            await HandleProgrammeElement(reader, context, result);
-                            break;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            reader.Dispose();
-        }
-
-        return result;
-    }
-
-    private static async Task HandlePremiereElement(XmlReader reader, ParsingContext context)
-    {
-        context.Programme!.IsPremiere = true;
-        context.Programme.PremiereLanguage = reader.GetAttribute("lang");
-
-        if (!reader.IsEmptyElement)
-        {
-            await reader.ReadAsync();
-            context.Programme.Premiere = await reader.ReadContentAsStringAsync();
-        }
-    }
-
-    private static void HandleNewElement(ParsingContext context)
-    {
-        context.Programme!.IsNew = true;
-    }
-
-    private static async Task HandleQualityElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        context.Programme!.Quality = await reader.ReadContentAsStringAsync();
-    }
-
-    private static async Task HandleCountryElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        context.Programme!.Countries ??= new List<string>();
-        context.Programme.Countries.Add(await reader.ReadContentAsStringAsync());
-    }
-
-    private static async Task HandleCategoryElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        context.Programme!.Categories ??= new List<string>();
-        context.Programme.Categories.Add(await reader.ReadContentAsStringAsync());
-    }
-
-    private static async Task HandleLanguageElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        context.Programme!.Language = await reader.ReadContentAsStringAsync();
-    }
-
-    private static async Task HandleEpisodeElement(XmlReader reader, ParsingContext context)
-    {
-        var system = reader.GetAttribute("system");
-        await reader.ReadAsync();
-        context.Programme!.Episodes ??= new List<XmlTvEpisode>();
-        context.Programme.Episodes.Add(new XmlTvEpisode
-        {
-            System = system,
-            Value = await reader.ReadContentAsStringAsync()
-        });
-    }
-
-    private static async Task HandleStarRatingElement(XmlReader reader, ParsingContext context)
-    {
-        if (await reader.ReadAsync())
-        {
-            if (reader is { NodeType: XmlNodeType.Element, Name: "value", IsEmptyElement: false })
-            {
-                await reader.ReadAsync();
-                context.Programme!.StarRating = await reader.ReadContentAsStringAsync();
-            }
-        }
-    }
-
-    private static async Task HandleRatingElement(XmlReader reader, ParsingContext context)
-    {
-        var system = reader.GetAttribute("system") ?? string.Empty;
-        var rating = new XmlTvRating();
-
-        context.Programme!.Ratings ??= new Dictionary<string, XmlTvRating>();
-        context.Programme.Ratings[system] = rating;
-
-        while (await reader.ReadAsync())
-        {
-            if (reader.NodeType == XmlNodeType.Element)
-            {
-                switch (reader.Name)
-                {
-                    case "value" when !reader.IsEmptyElement:
-                        await reader.ReadAsync();
-                        rating.Value = await reader.ReadContentAsStringAsync();
-                        break;
-                    case "icon":
-                        var icon = ReadIconElement(reader);
-                        if (icon != null)
-                        {
-                            rating.Icons.Add(icon);
-                        }
-
-                        break;
-                }
-            }
-
-            if (reader is { NodeType: XmlNodeType.EndElement, Name: "rating" })
-            {
-                break;
-            }
-        }
-    }
-
-    private static async Task HandleActorElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        context.Programme!.Actors ??= new List<string>();
-        context.Programme.Actors.Add(await reader.ReadContentAsStringAsync());
-    }
-
-    private static void HandlePreviouslyShownElement(XmlReader reader, ParsingContext context)
-    {
-        context.Programme!.IsPreviouslyShown = true;
-        context.Programme.PreviouslyShownChannel = reader.GetAttribute("channel");
-        var date = reader.GetAttribute("start");
-        if (DateTimeOffset.TryParseExact(date, StartStopFormats,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal, out var prevShownDate))
-        {
-            context.Programme.PreviouslyShownDate = TimeZoneInfo.ConvertTime(prevShownDate, context.Settings.TimeZone);
-        }
-    }
-
-    private static async Task HandleDateElement(XmlReader reader, ParsingContext context)
-    {
-        await reader.ReadAsync();
-        var dateStr = await reader.ReadContentAsStringAsync();
-
-        if (DateTimeOffset.TryParseExact(dateStr, DateFormats, CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal, out var date))
-        {
-            context.Programme!.Date = date;
-        }
-    }
-
-    private static async Task HandleDescriptionElement(XmlReader reader, ParsingContext context)
-    {
-        var lang = reader.GetAttribute("lang") ?? context.Settings.DefaultLanguage;
-        await reader.ReadAsync();
-        var description = await reader.ReadContentAsStringAsync();
-        context.Programme!.Descriptions ??= new Dictionary<string, string>();
-        context.Programme.Descriptions[lang] = description;
-    }
-
-    private static async Task HandleSubTitleElement(XmlReader reader, ParsingContext context)
-    {
-        var lang = reader.GetAttribute("lang") ?? context.Settings.DefaultLanguage;
-        await reader.ReadAsync();
-        var title = await reader.ReadContentAsStringAsync();
-        context.Programme!.SubTitles ??= new Dictionary<string, string>();
-        context.Programme.SubTitles[lang] = title;
-    }
-
-    private static async Task HandleTitleElement(XmlReader reader, ParsingContext context)
-    {
-        var lang = reader.GetAttribute("lang") ?? context.Settings.DefaultLanguage;
-        await reader.ReadAsync();
-        var title = await reader.ReadContentAsStringAsync();
-        context.Programme!.Titles[lang] = title;
-    }
-
-    private static async Task HandleProgrammeElement(XmlReader reader, ParsingContext context,
-        XmlTvResult? result = null)
-    {
-        var skip = false;
-
-        var channelIdFilter = context.Settings.FilterByProgrammeChannelId ?? context.Settings.FilterByChannelId;
-        var timeFilter = context.Settings.FilterByProgrammeTime;
-
-        var startString = reader.GetAttribute("start");
-        var stopString = reader.GetAttribute("stop");
-        var channelId = reader.GetAttribute("channel");
-
-        if (DateTimeOffset.TryParseExact(startString, StartStopFormats, CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal, out var start) &&
-            DateTimeOffset.TryParseExact(stopString, StartStopFormats, CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal, out var stop) && !string.IsNullOrWhiteSpace(channelId) &&
-            (channelIdFilter is null || channelIdFilter(channelId)) &&
-            (timeFilter is null || timeFilter(start, stop)))
-
-        {
-            var currentProgramme = new XmlTvProgramme
-            {
-                Start = TimeZoneInfo.ConvertTime(start, context.Settings.TimeZone),
-                Stop = TimeZoneInfo.ConvertTime(stop, context.Settings.TimeZone),
-                ChannelId = channelId
-            };
-            result?.Programmes.Add(currentProgramme);
-            context.Programme = currentProgramme;
-
-            if (context.Settings.IncludeOuterXml)
-            {
-                currentProgramme.OuterXml = await reader.ReadOuterXmlAsync();
-                reader = CreateXmlReader(new StringReader(currentProgramme.OuterXml));
-                await reader.ReadAsync();
-            }
-        }
-        else
-        {
-            skip = true;
-        }
-
-        while (await reader.ReadAsync())
-        {
-            if (reader.NodeType == XmlNodeType.Element && !skip)
-            {
-                switch (reader.Name)
-                {
-                    case "title" when !reader.IsEmptyElement:
-                        await HandleTitleElement(reader, context);
-                        break;
-                    case "sub-title" when !reader.IsEmptyElement:
-                        await HandleSubTitleElement(reader, context);
-                        break;
-                    case "desc" when !reader.IsEmptyElement:
-                        await HandleDescriptionElement(reader, context);
-                        break;
-                    case "date" when !reader.IsEmptyElement:
-                        await HandleDateElement(reader, context);
-                        break;
-                    case "previously-shown":
-                        HandlePreviouslyShownElement(reader, context);
-                        break;
-                    case "actor" when !reader.IsEmptyElement:
-                        await HandleActorElement(reader, context);
-                        break;
-                    case "credits":
-                        await HandleCreditsElement(reader, context);
-                        break;
-                    case "rating":
-                        await HandleRatingElement(reader, context);
-                        break;
-                    case "star-rating":
-                        await HandleStarRatingElement(reader, context);
-                        break;
-                    case "episode-num" when !reader.IsEmptyElement:
-                        await HandleEpisodeElement(reader, context);
-                        break;
-                    case "language" when !reader.IsEmptyElement:
-                        await HandleLanguageElement(reader, context);
-                        break;
-                    case "category" when !reader.IsEmptyElement:
-                        await HandleCategoryElement(reader, context);
-                        break;
-                    case "country" when !reader.IsEmptyElement:
-                        await HandleCountryElement(reader, context);
-                        break;
-                    case "quality" when !reader.IsEmptyElement:
-                        await HandleQualityElement(reader, context);
-                        break;
-                    case "new":
-                        HandleNewElement(context);
-                        break;
-                    case "premiere":
-                        await HandlePremiereElement(reader, context);
-                        break;
-                    case "icon":
-                        var icon = ReadIconElement(reader);
-                        if (icon != null)
-                        {
-                            context.Programme!.Icons ??= new List<XmlTvIcon>();
-                            context.Programme.Icons.Add(icon);
-                        }
-
-                        break;
-                    case "url" when !reader.IsEmptyElement:
-                        var url = await ReadUrlElement(reader);
-                        context.Programme!.Urls ??= new List<XmlTvUrl>();
-                        context.Programme.Urls.Add(url);
-
-                        break;
-                }
-            }
-
-            if (reader is { NodeType: XmlNodeType.EndElement, Name: "programme" })
-            {
-                return;
-            }
-        }
-    }
-
-    private static async Task HandleChannelElement(XmlReader reader, ParsingContext context, XmlTvResult? result = null)
-    {
-        var skip = false;
-        var channelFilter = context.Settings.FilterByChannelId;
-
-        var id = reader.GetAttribute("id");
-        if (!string.IsNullOrWhiteSpace(id) && (channelFilter is null || channelFilter(id)))
-        {
-            var currentChannel = new XmlTvChannel
-            {
-                Id = id
-            };
-            result?.Channels.Add(currentChannel);
-            context.Channel = currentChannel;
-
-            if (context.Settings.IncludeOuterXml)
-            {
-                currentChannel.OuterXml = await reader.ReadOuterXmlAsync();
-                reader = CreateXmlReader(new StringReader(currentChannel.OuterXml));
-                await reader.ReadAsync();
-            }
-        }
-        else
-        {
-            skip = true;
-        }
-
-        while (await reader.ReadAsync())
-        {
-            if (reader.NodeType == XmlNodeType.Element && !skip)
-            {
-                switch (reader.Name)
-                {
-                    case "display-name" when !reader.IsEmptyElement:
-                        await HandleDisplayNameElement(reader, context);
-                        break;
-                    case "icon":
-                        var icon = ReadIconElement(reader);
-                        if (icon != null)
-                        {
-                            context.Channel!.Icons ??= new List<XmlTvIcon>();
-                            context.Channel.Icons.Add(icon);
-                        }
-
-                        break;
-                    case "url" when !reader.IsEmptyElement:
-                        context.Channel!.Urls ??= new List<XmlTvUrl>();
-                        var url = await ReadUrlElement(reader);
-                        context.Channel.Urls.Add(url);
-
-                        break;
-                }
-            }
-
-            if (reader is { NodeType: XmlNodeType.EndElement, Name: "channel" })
-            {
-                return;
-            }
-        }
-    }
-
-    private static async Task HandleDisplayNameElement(XmlReader reader, ParsingContext context)
-    {
-        var lang = reader.GetAttribute("lang") ?? context.Settings.DefaultLanguage;
-        await reader.ReadAsync();
-        var displayName = await reader.ReadContentAsStringAsync();
-
-        context.Channel!.DisplayNames[lang] = displayName;
-    }
-
-    private static XmlTvIcon? ReadIconElement(XmlReader reader)
-    {
-        var iconSrc = reader.GetAttribute("src");
-        var heightStr = reader.GetAttribute("height");
-        var widthStr = reader.GetAttribute("width");
-
-        int? height = int.TryParse(heightStr, out var h) ? h : null;
-        int? width = int.TryParse(widthStr, out var w) ? w : null;
-
-        if (string.IsNullOrWhiteSpace(iconSrc))
-        {
-            return default;
-        }
-
-        return new XmlTvIcon
-        {
-            Source = iconSrc,
-            Height = height,
-            Width = width
-        };
-    }
-
-    private static async Task<XmlTvUrl> ReadUrlElement(XmlReader reader)
-    {
-        var system = reader.GetAttribute("system");
-        await reader.ReadAsync();
-        return new XmlTvUrl
-        {
-            System = system,
-            Value = await reader.ReadContentAsStringAsync()
-        };
-    }
-
-    private static async Task HandleCreditsElement(XmlReader reader, ParsingContext context)
-    {
-        var credits = new XmlTvCredits();
-        context.Programme!.Credits = credits;
-
-        while (await reader.ReadAsync())
-        {
-            if (reader is { NodeType: XmlNodeType.Element, IsEmptyElement: false })
-            {
-                switch (reader.Name)
-                {
-                    case "director":
-                        await reader.ReadAsync();
-                        credits.Directors ??= new List<string>();
-                        credits.Directors.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "actor":
-                        var actorRole = reader.GetAttribute("role");
-                        await reader.ReadAsync();
-                        var actorName = await reader.ReadContentAsStringAsync();
-                        credits.Actors ??= new List<XmlTvPerson>();
-                        credits.Actors.Add(new XmlTvPerson
-                        {
-                            Role = actorRole,
-                            Name = actorName
-                        });
-                        break;
-                    case "writer":
-                        await reader.ReadAsync();
-                        credits.Writers ??= new List<string>();
-                        credits.Writers.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "adapter":
-                        await reader.ReadAsync();
-                        credits.Adapters ??= new List<string>();
-                        credits.Adapters.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "producer":
-                        await reader.ReadAsync();
-                        credits.Producers ??= new List<string>();
-                        credits.Producers.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "composer":
-                        await reader.ReadAsync();
-                        credits.Composers ??= new List<string>();
-                        credits.Composers.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "editor":
-                        await reader.ReadAsync();
-                        credits.Editors ??= new List<string>();
-                        credits.Editors.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "presenter":
-                        await reader.ReadAsync();
-                        credits.Presenters ??= new List<string>();
-                        credits.Presenters.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "commentator":
-                        await reader.ReadAsync();
-                        credits.Commentators ??= new List<string>();
-                        credits.Commentators.Add(await reader.ReadContentAsStringAsync());
-                        break;
-                    case "guest":
-                        var guestRole = reader.GetAttribute("role") ?? string.Empty;
-                        await reader.ReadAsync();
-                        var guestName = await reader.ReadContentAsStringAsync();
-                        credits.Guests ??= new List<XmlTvPerson>();
-                        credits.Guests.Add(new XmlTvPerson
-                        {
-                            Role = guestRole,
-                            Name = guestName
-                        });
-                        break;
-                }
-            }
-
-            if (reader is { NodeType: XmlNodeType.EndElement, Name: "credits" })
-            {
-                return;
-            }
-        }
-    }
-
-    private class ParsingContext
-    {
-        public ParsingContext(XmlTvReaderSettings settings)
-        {
-            Settings = settings;
-        }
-
-        public XmlTvProgramme? Programme { get; set; }
-        public XmlTvChannel? Channel { get; set; }
-        public XmlTvReaderSettings Settings { get; set; }
-    }
-
-    private static XmlReader CreateXmlReader(string path)
-    {
-        return XmlReader.Create(path, new XmlReaderSettings
-        {
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreWhitespace = true,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
-    }
-
-    private static XmlReader CreateXmlReader(Stream stream)
-    {
-        return XmlReader.Create(stream, new XmlReaderSettings
-        {
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreWhitespace = true,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
-    }
-
-    private static XmlReader CreateXmlReader(TextReader reader)
-    {
-        return XmlReader.Create(reader, new XmlReaderSettings
-        {
-            DtdProcessing = DtdProcessing.Ignore,
-            IgnoreWhitespace = true,
-            IgnoreComments = true,
-            IgnoreProcessingInstructions = true,
-            Async = true
-        });
-    }
-
+    /// <summary>Releases the underlying XML reader.</summary>
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        if (_disposed)
+        {
+            return;
+        }
+
+        _reader.Dispose();
+        _disposed = true;
     }
 
-    protected virtual void Dispose(bool disposing)
+    /// <summary>Reads a complete XMLTV document from a file path.</summary>
+    /// <param name="path">The XMLTV file path.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    public static Task<XmlTvDocument> ReadAsync(
+        string path,
+        CancellationToken cancellationToken)
     {
-        if (disposing)
+        return ReadAsync(path, null, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a file path.</summary>
+    /// <param name="path">The XMLTV file path.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    public static Task<XmlTvDocument> ReadAsync(
+        string path,
+        XmlTvReaderOptions? options,
+        CancellationToken cancellationToken)
+    {
+        return ReadAsync(path, options, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a file path.</summary>
+    /// <param name="path">The XMLTV file path.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    public static async Task<XmlTvDocument> ReadAsync(
+        string path,
+        XmlTvReaderOptions? options = null,
+        XmlTvReadFilter? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var reader = new XmlTvReader(path, options, filter);
+        return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a stream.</summary>
+    /// <param name="stream">The XMLTV stream.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The stream remains open after the read completes.</remarks>
+    public static Task<XmlTvDocument> ReadAsync(
+        Stream stream,
+        CancellationToken cancellationToken)
+    {
+        return ReadAsync(stream, null, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a stream.</summary>
+    /// <param name="stream">The XMLTV stream.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The stream remains open after the read completes.</remarks>
+    public static Task<XmlTvDocument> ReadAsync(
+        Stream stream,
+        XmlTvReaderOptions? options,
+        CancellationToken cancellationToken)
+    {
+        return ReadAsync(stream, options, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a stream.</summary>
+    /// <param name="stream">The XMLTV stream.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The stream remains open after the read completes.</remarks>
+    public static async Task<XmlTvDocument> ReadAsync(
+        Stream stream,
+        XmlTvReaderOptions? options = null,
+        XmlTvReadFilter? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var reader = new XmlTvReader(stream, options, filter, true);
+        return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a text reader.</summary>
+    /// <param name="textReader">The XMLTV text reader.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The text reader remains open after the read completes.</remarks>
+    public static Task<XmlTvDocument> ReadAsync(
+        TextReader textReader,
+        CancellationToken cancellationToken)
+    {
+        return ReadAsync(textReader, null, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a text reader.</summary>
+    /// <param name="textReader">The XMLTV text reader.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The text reader remains open after the read completes.</remarks>
+    public static Task<XmlTvDocument> ReadAsync(
+        TextReader textReader,
+        XmlTvReaderOptions? options,
+        CancellationToken cancellationToken)
+    {
+        return ReadAsync(textReader, options, null, cancellationToken);
+    }
+
+    /// <summary>Reads a complete XMLTV document from a text reader.</summary>
+    /// <param name="textReader">The XMLTV text reader.</param>
+    /// <param name="options">Optional reader options.</param>
+    /// <param name="filter">Optional read filter.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>The text reader remains open after the read completes.</remarks>
+    public static async Task<XmlTvDocument> ReadAsync(
+        TextReader textReader,
+        XmlTvReaderOptions? options = null,
+        XmlTvReadFilter? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var reader = new XmlTvReader(textReader, options, filter, true);
+        return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Reads metadata from the XMLTV <c>tv</c> root element.</summary>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The parsed XMLTV root metadata.</returns>
+    /// <remarks>
+    ///     The metadata is read once and cached. Calling this method more than once returns the same metadata, and
+    ///     <see cref="ReadElementAsync" /> also reads it first when needed.
+    /// </remarks>
+    public Task<XmlTvMetadata> ReadMetadataAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return _parser.ReadMetadataAsync(cancellationToken);
+    }
+
+    /// <summary>Reads the next supported top-level XMLTV child element.</summary>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <returns>The next channel or programme, or <see langword="null" /> at the end of the document.</returns>
+    /// <remarks>
+    ///     This method returns only <see cref="XmlTvChannel" /> and <see cref="XmlTvProgramme" /> elements. Use
+    ///     <see cref="ReadMetadataAsync" /> for metadata from the XMLTV <c>tv</c> root element.
+    /// </remarks>
+    public Task<IXmlTvElement?> ReadElementAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return _parser.ReadElementAsync(cancellationToken);
+    }
+
+    private async Task<XmlTvDocument> ReadDocumentAsync(CancellationToken cancellationToken)
+    {
+        ThrowIfDisposed();
+        return await _parser.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
         {
-            _reader.Dispose();
+            throw new ObjectDisposedException(nameof(XmlTvReader));
         }
     }
 }
