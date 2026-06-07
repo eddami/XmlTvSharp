@@ -9,24 +9,31 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Setup dotnet 8.0
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build -c Release --no-restore
       - name: Test
-        run: dotnet test -c Release --no-build --verbosity=normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+        run: dotnet test -c Release --no-build --no-restore --verbosity=normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      - name: Validate package
+        run: dotnet pack ./src/XmlTvSharp/XmlTvSharp.csproj -c Release --no-build --no-restore --output ./artifacts
       - name: Publish coverage report to coveralls.io
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./src/XmlTvSharp.Tests/TestResults/coverage.info 
+          path-to-lcov: ./src/XmlTvSharp.Tests/TestResults/coverage.info

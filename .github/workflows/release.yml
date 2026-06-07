@@ -3,25 +3,30 @@ name: Release
 on:
   push:
     tags:
-      - '*.*.*'
+      - 'v*.*.*'
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Setup dotnet 8.0
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build -c Release --no-restore
       - name: Test
-        run: dotnet test -c Release --no-build --verbosity=normal
+        run: dotnet test -c Release --no-build --no-restore --verbosity=normal
       - name: Pack
-        run: dotnet pack ./src/XmlTvSharp/XmlTvSharp.csproj -c Release --no-build
-      - name: Push to Nuget
-        run: dotnet nuget push ./src/XmlTvSharp/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+        run: dotnet pack ./src/XmlTvSharp/XmlTvSharp.csproj -c Release --no-build --no-restore --output ./artifacts
+      - name: Push to NuGet
+        run: dotnet nuget push ./artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}

@@ -1,7 +1,9 @@
 <Project>
     <PropertyGroup>
-        <LangVersion>10.0</LangVersion>
-        <NoWarn>$(NoWarn);CS1701;CS1702;CS1591</NoWarn>
+        <LangVersion>14.0</LangVersion>
+        <NoWarn>$(NoWarn);CS1701;CS1702</NoWarn>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>high</NuGetAuditLevel>
     </PropertyGroup>
 </Project>
