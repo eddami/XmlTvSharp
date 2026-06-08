@@ -48,7 +48,11 @@ internal sealed partial class XmlTvParser
                             .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Icon:
-                    icons.Add(ReadIcon());
+                    if (ReadIcon() is { } icon)
+                    {
+                        icons.Add(icon);
+                    }
+
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
                     continue;
                 case XmlTvNames.Elements.Url:

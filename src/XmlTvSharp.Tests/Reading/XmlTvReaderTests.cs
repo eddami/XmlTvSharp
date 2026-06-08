@@ -212,6 +212,57 @@ public sealed class XmlTvReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_EmptyOptionalIconSource_SkipsIcon()
+    {
+        const string xml = """
+                           <tv>
+                             <channel id="one">
+                               <display-name>One</display-name>
+                               <icon src="" />
+                             </channel>
+                           </tv>
+                           """;
+
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
+
+        var channel = Assert.Single(document.Channels);
+        Assert.Empty(channel.Icons);
+    }
+
+    [Fact]
+    public async Task ReadAsync_InvalidOptionalIconSize_SkipsIcon()
+    {
+        const string xml = """
+                           <tv>
+                             <channel id="one">
+                               <display-name>One</display-name>
+                               <icon src="one.png" width="bad" />
+                             </channel>
+                           </tv>
+                           """;
+
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
+
+        var channel = Assert.Single(document.Channels);
+        Assert.Empty(channel.Icons);
+    }
+
+    [Fact]
+    public async Task ReadAsync_EmptyRequiredChannelId_ThrowsXmlTvReadException()
+    {
+        const string xml = """
+                           <tv>
+                             <channel id="">
+                               <display-name>One</display-name>
+                             </channel>
+                           </tv>
+                           """;
+
+        await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task ReadAsync_ParsesStandardProgrammeMetadata()
     {
         const string xml = """

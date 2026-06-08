@@ -157,18 +157,30 @@ internal sealed partial class XmlTvParser
         }
     }
 
-    private XmlTvIcon ReadIcon()
+    private XmlTvIcon? ReadIcon()
     {
         ValidateAttributes(
             XmlTvNames.Attributes.Src,
             XmlTvNames.Attributes.Width,
             XmlTvNames.Attributes.Height);
 
-        var source = RequiredAttribute(XmlTvNames.Attributes.Src);
-        return new XmlTvIcon(
-            source,
-            ReadOptionalPositiveIntAttribute(XmlTvNames.Attributes.Width),
-            ReadOptionalPositiveIntAttribute(XmlTvNames.Attributes.Height));
+        var source = _reader.GetAttribute(XmlTvNames.Attributes.Src);
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return null;
+        }
+
+        try
+        {
+            return new XmlTvIcon(
+                source,
+                ReadOptionalPositiveIntAttribute(XmlTvNames.Attributes.Width),
+                ReadOptionalPositiveIntAttribute(XmlTvNames.Attributes.Height));
+        }
+        catch (XmlTvReadException)
+        {
+            return null;
+        }
     }
 
     private int? ReadOptionalPositiveIntAttribute(string name)
