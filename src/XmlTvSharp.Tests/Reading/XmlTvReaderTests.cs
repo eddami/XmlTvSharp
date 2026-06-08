@@ -600,4 +600,46 @@ public sealed class XmlTvReaderTests
 
         Assert.Single(document.Channels);
     }
+
+    [Fact]
+    public async Task ReadAsync_WithCancelledToken_ThrowsBeforeOpeningFile()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.xml");
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() =>
+            XmlTvReader.ReadAsync(path, cancellationTokenSource.Token));
+    }
+
+    [Theory]
+    [InlineData("profile")]
+    [InlineData("unknown-element")]
+    [InlineData("unknown-attribute")]
+    [InlineData("x-extension")]
+    public void Constructor_InvalidReaderOption_ThrowsArgumentOutOfRangeException(string option)
+    {
+        var options = option switch
+        {
+            "profile" => new XmlTvReaderOptions
+            {
+                CompatibilityProfile = (XmlTvCompatibilityProfile)999
+            },
+            "unknown-element" => new XmlTvReaderOptions
+            {
+                UnknownElementHandling = (XmlTvUnknownContentHandling)999
+            },
+            "unknown-attribute" => new XmlTvReaderOptions
+            {
+                UnknownAttributeHandling = (XmlTvUnknownContentHandling)999
+            },
+            _ => new XmlTvReaderOptions
+            {
+                XExtensionHandling = (XmlTvUnknownContentHandling)999
+            }
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new XmlTvReader(new StringReader("<tv />"), options));
+    }
 }

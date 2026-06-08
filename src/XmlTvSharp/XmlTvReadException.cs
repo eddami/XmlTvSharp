@@ -3,6 +3,7 @@ namespace XmlTvSharp;
 /// <summary>
 ///     Represents an error encountered while reading XMLTV content.
 /// </summary>
+/// <remarks>Read exceptions include XML line information when the underlying reader provides it.</remarks>
 public sealed class XmlTvReadException : Exception
 {
     /// <summary>Initializes a read exception.</summary>

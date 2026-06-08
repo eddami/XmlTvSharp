@@ -5,6 +5,10 @@ namespace XmlTvSharp;
 /// <summary>
 ///     Builds a top-level XMLTV element filter.
 /// </summary>
+/// <remarks>
+///     Branches are opt-in. Include channel and programme branches explicitly, or build without includes for
+///     metadata-only reads.
+/// </remarks>
 public sealed class XmlTvElementFilterBuilder
 {
     private XmlTvChannelReadFilter? _channels;
@@ -68,6 +72,7 @@ public sealed class XmlTvElementFilterBuilder
 
     /// <summary>Builds the immutable read filter.</summary>
     /// <returns>The read filter.</returns>
+    /// <remarks>Building without included branches is valid and produces a metadata-only filter.</remarks>
     public XmlTvReadFilter Build()
     {
         return new XmlTvReadFilter(_channels, _programmes);

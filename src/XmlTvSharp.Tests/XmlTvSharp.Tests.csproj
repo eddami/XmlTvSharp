@@ -30,4 +30,8 @@
         <ProjectReference Include="..\XmlTvSharp\XmlTvSharp.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="Fixtures\Dtd\xmltv.dtd" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
 </Project>

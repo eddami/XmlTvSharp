@@ -11,7 +11,7 @@
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
         <PackageTags>xmltv;tv;epg;xml</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Description>A high-performance, asynchronous XMLTV parser for TV program data.</Description>
+        <Description>A high-performance, asynchronous XMLTV reader and writer for TV program data.</Description>
         <MinVerTagPrefix>v</MinVerTagPrefix>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>

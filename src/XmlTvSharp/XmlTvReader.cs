@@ -7,6 +7,11 @@ namespace XmlTvSharp;
 /// <summary>
 ///     Reads complete XMLTV documents and supported top-level XMLTV elements from XML streams.
 /// </summary>
+/// <remarks>
+///     The reader is forward-only and not thread-safe. Use <see cref="ReadAsync(string, CancellationToken)" /> for
+///     complete-document reads, or call <see cref="ReadMetadataAsync" /> and <see cref="ReadElementAsync" /> for
+///     streaming reads.
+/// </remarks>
 public sealed class XmlTvReader : IDisposable
 {
     private readonly XmlTvParser _parser;
@@ -17,6 +22,7 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="path">The XMLTV file path.</param>
     /// <param name="options">Optional reader options.</param>
     /// <param name="filter">Optional read filter.</param>
+    /// <remarks>The file is owned by this reader.</remarks>
     public XmlTvReader(string path, XmlTvReaderOptions? options = null, XmlTvReadFilter? filter = null)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -24,8 +30,9 @@ public sealed class XmlTvReader : IDisposable
             throw new ArgumentException("Path cannot be empty or whitespace.", nameof(path));
         }
 
+        var readerOptions = ValidateOptions(options);
         _reader = XmlTvReaderFactory.Create(path);
-        _parser = new XmlTvParser(_reader, options, filter);
+        _parser = new XmlTvParser(_reader, readerOptions, filter);
     }
 
     /// <summary>Initializes a reader for a stream.</summary>
@@ -39,8 +46,9 @@ public sealed class XmlTvReader : IDisposable
         XmlTvReadFilter? filter = null,
         bool leaveOpen = false)
     {
+        var readerOptions = ValidateOptions(options);
         _reader = XmlTvReaderFactory.Create(stream ?? throw new ArgumentNullException(nameof(stream)), leaveOpen);
-        _parser = new XmlTvParser(_reader, options, filter);
+        _parser = new XmlTvParser(_reader, readerOptions, filter);
     }
 
     /// <summary>Initializes a reader for a text reader.</summary>
@@ -54,9 +62,10 @@ public sealed class XmlTvReader : IDisposable
         XmlTvReadFilter? filter = null,
         bool leaveOpen = false)
     {
+        var readerOptions = ValidateOptions(options);
         _reader = XmlTvReaderFactory.Create(textReader ?? throw new ArgumentNullException(nameof(textReader)),
             leaveOpen);
-        _parser = new XmlTvParser(_reader, options, filter);
+        _parser = new XmlTvParser(_reader, readerOptions, filter);
     }
 
     /// <summary>Releases the underlying XML reader.</summary>
@@ -75,6 +84,7 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="path">The XMLTV file path.</param>
     /// <param name="cancellationToken">A token used to cancel the operation.</param>
     /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>A <see langword="null" /> filter reads all supported top-level child elements.</remarks>
     public static Task<XmlTvDocument> ReadAsync(
         string path,
         CancellationToken cancellationToken)
@@ -87,6 +97,7 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="options">Optional reader options.</param>
     /// <param name="cancellationToken">A token used to cancel the operation.</param>
     /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>A <see langword="null" /> filter reads all supported top-level child elements.</remarks>
     public static Task<XmlTvDocument> ReadAsync(
         string path,
         XmlTvReaderOptions? options,
@@ -101,12 +112,14 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="filter">Optional read filter.</param>
     /// <param name="cancellationToken">A token used to cancel the operation.</param>
     /// <returns>The parsed XMLTV document.</returns>
+    /// <remarks>A <see langword="null" /> filter reads all supported top-level child elements.</remarks>
     public static async Task<XmlTvDocument> ReadAsync(
         string path,
         XmlTvReaderOptions? options = null,
         XmlTvReadFilter? filter = null,
         CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var reader = new XmlTvReader(path, options, filter);
         return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -150,6 +163,7 @@ public sealed class XmlTvReader : IDisposable
         XmlTvReadFilter? filter = null,
         CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var reader = new XmlTvReader(stream, options, filter, true);
         return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -193,6 +207,7 @@ public sealed class XmlTvReader : IDisposable
         XmlTvReadFilter? filter = null,
         CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var reader = new XmlTvReader(textReader, options, filter, true);
         return await reader.ReadDocumentAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -201,8 +216,9 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="cancellationToken">A token used to cancel the operation.</param>
     /// <returns>The parsed XMLTV root metadata.</returns>
     /// <remarks>
-    ///     The metadata is read once and cached. Calling this method more than once returns the same metadata, and
-    ///     <see cref="ReadElementAsync" /> also reads it first when needed.
+    ///     The metadata is read once and cached. Calling this method more than once returns the same metadata.
+    ///     <see cref="ReadElementAsync" /> reads the metadata first when needed, but it does not return metadata as an
+    ///     element.
     /// </remarks>
     public Task<XmlTvMetadata> ReadMetadataAsync(CancellationToken cancellationToken = default)
     {
@@ -214,8 +230,8 @@ public sealed class XmlTvReader : IDisposable
     /// <param name="cancellationToken">A token used to cancel the operation.</param>
     /// <returns>The next channel or programme, or <see langword="null" /> at the end of the document.</returns>
     /// <remarks>
-    ///     This method returns only <see cref="XmlTvChannel" /> and <see cref="XmlTvProgramme" /> elements. Use
-    ///     <see cref="ReadMetadataAsync" /> for metadata from the XMLTV <c>tv</c> root element.
+    ///     This method returns only <see cref="XmlTvChannel" /> and <see cref="XmlTvProgramme" /> elements accepted by
+    ///     the reader filter. Use <see cref="ReadMetadataAsync" /> for metadata from the XMLTV <c>tv</c> root element.
     /// </remarks>
     public Task<IXmlTvElement?> ReadElementAsync(CancellationToken cancellationToken = default)
     {
@@ -235,5 +251,44 @@ public sealed class XmlTvReader : IDisposable
         {
             throw new ObjectDisposedException(nameof(XmlTvReader));
         }
+    }
+
+    private static XmlTvReaderOptions ValidateOptions(XmlTvReaderOptions? options)
+    {
+        var readerOptions = options ?? new XmlTvReaderOptions();
+
+        if (!Enum.IsDefined(typeof(XmlTvCompatibilityProfile), readerOptions.CompatibilityProfile))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                readerOptions.CompatibilityProfile,
+                "Unsupported XMLTV compatibility profile.");
+        }
+
+        if (!Enum.IsDefined(typeof(XmlTvUnknownContentHandling), readerOptions.UnknownElementHandling))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                readerOptions.UnknownElementHandling,
+                "Unsupported unknown element handling behavior.");
+        }
+
+        if (!Enum.IsDefined(typeof(XmlTvUnknownContentHandling), readerOptions.UnknownAttributeHandling))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                readerOptions.UnknownAttributeHandling,
+                "Unsupported unknown attribute handling behavior.");
+        }
+
+        if (!Enum.IsDefined(typeof(XmlTvUnknownContentHandling), readerOptions.XExtensionHandling))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                readerOptions.XExtensionHandling,
+                "Unsupported x-extension handling behavior.");
+        }
+
+        return readerOptions;
     }
 }
