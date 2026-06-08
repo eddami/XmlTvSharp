@@ -11,9 +11,9 @@ public sealed class XmlTvWriterCompatibilityTests
         var programme = CreateLiveProgramme();
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
         Assert.Empty(programmeElement.Elements("live"));
@@ -29,9 +29,9 @@ public sealed class XmlTvWriterCompatibilityTests
         };
         using var writer = new XmlTvWriter(output, options);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(CreateLiveProgramme());
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(CreateLiveProgramme(), TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
         var live = Assert.Single(programmeElement.Elements("live"));
@@ -59,11 +59,11 @@ public sealed class XmlTvWriterCompatibilityTests
         {
             CompatibilityProfile = XmlTvCompatibilityProfile.Jellyfin
         };
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
         var output = new StringWriter();
 
-        await XmlTvWriter.WriteAsync(document, output, writerOptions);
-        var roundTripped = await XmlTvReader.ReadAsync(new StringReader(output.ToString()), options);
+        await XmlTvWriter.WriteAsync(document, output, writerOptions, TestContext.Current.CancellationToken);
+        var roundTripped = await XmlTvReader.ReadAsync(new StringReader(output.ToString()), options, TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(roundTripped.Programmes);
         Assert.True(programme.Extensions.Jellyfin?.IsLive);

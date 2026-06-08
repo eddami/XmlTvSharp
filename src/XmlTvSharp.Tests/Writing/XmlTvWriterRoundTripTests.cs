@@ -52,11 +52,11 @@ public sealed class XmlTvWriterRoundTripTests
                              </programme>
                            </tv>
                            """;
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
         var output = new StringWriter();
 
-        await XmlTvWriter.WriteAsync(document, output);
-        var roundTripped = await XmlTvReader.ReadAsync(new StringReader(output.ToString()));
+        await XmlTvWriter.WriteAsync(document, output, TestContext.Current.CancellationToken);
+        var roundTripped = await XmlTvReader.ReadAsync(new StringReader(output.ToString()), TestContext.Current.CancellationToken);
 
         Assert.Equal("20260605", roundTripped.Metadata.Date!.ToXmlTvString());
         Assert.Equal("Source", roundTripped.Metadata.SourceInfoName);

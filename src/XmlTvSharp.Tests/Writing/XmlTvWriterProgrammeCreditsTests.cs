@@ -25,9 +25,9 @@ public sealed class XmlTvWriterProgrammeCreditsTests
         programme.Credits.Directors.Add(new XmlTvCredit("Director"));
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
         Assert.Equal(new[] { "title", "credits", "date" },
@@ -76,9 +76,9 @@ public sealed class XmlTvWriterProgrammeCreditsTests
         programme.Credits.Actors.Add(actor);
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var actorElement = Assert.Single(
             XDocument.Parse(output.ToString()).Root!.Element("programme")!.Element("credits")!.Elements("actor"));
@@ -110,9 +110,9 @@ public sealed class XmlTvWriterProgrammeCreditsTests
         };
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var credits = Assert.Single(XDocument.Parse(output.ToString()).Root!.Element("programme")!.Elements("credits"));
         Assert.Empty(credits.Elements());
@@ -129,9 +129,9 @@ public sealed class XmlTvWriterProgrammeCreditsTests
         programme.Credits.Directors.Add(null!);
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme));
+        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
         Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
     }
 
@@ -148,9 +148,9 @@ public sealed class XmlTvWriterProgrammeCreditsTests
         programme.Credits.Directors.Add(credit);
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme));
+        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
         Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
     }
 }

@@ -14,7 +14,7 @@ public sealed class XmlTvReaderSecurityTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
@@ -32,7 +32,7 @@ public sealed class XmlTvReaderSecurityTests
                            """;
 
         var exception =
-            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
 
         Assert.IsType<XmlException>(exception.InnerException);
     }
@@ -50,7 +50,7 @@ public sealed class XmlTvReaderSecurityTests
                            """;
 
         var exception =
-            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
 
         Assert.IsType<XmlException>(exception.InnerException);
     }

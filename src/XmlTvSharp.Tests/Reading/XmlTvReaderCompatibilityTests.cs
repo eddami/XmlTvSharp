@@ -18,7 +18,7 @@ public sealed class XmlTvReaderCompatibilityTests
             CompatibilityProfile = XmlTvCompatibilityProfile.Jellyfin
         };
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.True(programme.Extensions.Jellyfin?.IsLive);
@@ -36,7 +36,7 @@ public sealed class XmlTvReaderCompatibilityTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -55,6 +55,6 @@ public sealed class XmlTvReaderCompatibilityTests
             CompatibilityProfile = XmlTvCompatibilityProfile.Jellyfin
         };
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), options));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken));
     }
 }

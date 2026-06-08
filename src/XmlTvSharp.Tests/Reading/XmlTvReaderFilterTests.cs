@@ -18,7 +18,7 @@ public sealed class XmlTvReaderFilterTests
             .IncludeChannels()
             .Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Single(document.Channels);
         Assert.Empty(document.Programmes);
@@ -38,7 +38,7 @@ public sealed class XmlTvReaderFilterTests
             .IncludeChannels(channels => channels.WithIds("two"))
             .Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var channel = Assert.Single(document.Channels);
         Assert.Equal("two", channel.Id);
@@ -62,7 +62,7 @@ public sealed class XmlTvReaderFilterTests
             .IncludeProgrammes(programmes => programmes.ForChannels("two"))
             .Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal("two", programme.ChannelId);
@@ -87,7 +87,7 @@ public sealed class XmlTvReaderFilterTests
             .IncludeProgrammes(programmes => programmes.ForChannels("keep"))
             .Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal("keep", programme.ChannelId);
@@ -111,7 +111,7 @@ public sealed class XmlTvReaderFilterTests
             .IncludeProgrammes()
             .Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Empty(document.Channels);
         Assert.Single(document.Programmes);
@@ -137,9 +137,9 @@ public sealed class XmlTvReaderFilterTests
             .Build();
         using var reader = new XmlTvReader(new StringReader(xml), filter: filter);
 
-        var metadata = await reader.ReadMetadataAsync();
-        var element = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync());
-        var end = await reader.ReadElementAsync();
+        var metadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
+        var element = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var end = await reader.ReadElementAsync(TestContext.Current.CancellationToken);
 
         Assert.Null(metadata.SourceInfoName);
         Assert.Equal("two", element.ChannelId);
@@ -161,8 +161,8 @@ public sealed class XmlTvReaderFilterTests
         var filter = XmlTvReadFilter.Create().Build();
         using var reader = new XmlTvReader(new StringReader(xml), filter: filter);
 
-        var metadata = await reader.ReadMetadataAsync();
-        var end = await reader.ReadElementAsync();
+        var metadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
+        var end = await reader.ReadElementAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("Source", metadata.SourceInfoName);
         Assert.Null(end);
@@ -182,7 +182,7 @@ public sealed class XmlTvReaderFilterTests
 
         var filter = XmlTvReadFilter.Create().Build();
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), filter: filter, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("Source", document.Metadata.SourceInfoName);
         Assert.Empty(document.Channels);

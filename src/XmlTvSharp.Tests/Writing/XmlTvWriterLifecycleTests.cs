@@ -10,7 +10,7 @@ public sealed class XmlTvWriterLifecycleTests
         using var writer = CreateWriter();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            writer.WriteChannelAsync(new XmlTvChannel("channel", "Channel")));
+            writer.WriteChannelAsync(new XmlTvChannel("channel", "Channel"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public sealed class XmlTvWriterLifecycleTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             writer.WriteProgrammeAsync(new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel",
-                "Title")));
+                "Title"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = CreateWriter();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.CompleteAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.CompleteAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -36,9 +36,9 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = CreateWriter();
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.StartAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -46,10 +46,10 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = CreateWriter();
 
-        await writer.StartAsync();
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.CompleteAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => writer.CompleteAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -57,12 +57,12 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = CreateWriter();
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
         await writer.WriteProgrammeAsync(new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel",
-            "Title"));
+            "Title"), TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            writer.WriteChannelAsync(new XmlTvChannel("channel", "Channel")));
+            writer.WriteChannelAsync(new XmlTvChannel("channel", "Channel"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -70,12 +70,12 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = CreateWriter();
 
-        await writer.StartAsync();
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             writer.WriteProgrammeAsync(new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel",
-                "Title")));
+                "Title"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public sealed class XmlTvWriterLifecycleTests
         var writer = CreateWriter();
         writer.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => writer.StartAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -135,9 +135,9 @@ public sealed class XmlTvWriterLifecycleTests
     {
         using var writer = new XmlTvWriter(new ThrowingFlushTextWriter());
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.CompleteAsync());
+        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.CompleteAsync(TestContext.Current.CancellationToken));
         Assert.Contains("complete", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.IsType<IOException>(exception.InnerException);
     }

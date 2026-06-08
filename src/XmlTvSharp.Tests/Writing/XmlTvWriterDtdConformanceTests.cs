@@ -14,7 +14,7 @@ public sealed class XmlTvWriterDtdConformanceTests
         await XmlTvWriter.WriteAsync(document, output, new XmlTvWriterOptions
         {
             OmitXmlDeclaration = true
-        });
+        }, TestContext.Current.CancellationToken);
 
         ValidateAgainstXmlTvDtd(output.ToString());
     }
@@ -28,7 +28,7 @@ public sealed class XmlTvWriterDtdConformanceTests
         await XmlTvWriter.WriteAsync(document, output, new XmlTvWriterOptions
         {
             OmitXmlDeclaration = true
-        });
+        }, TestContext.Current.CancellationToken);
 
         ValidateAgainstXmlTvDtd(output.ToString());
     }
@@ -42,7 +42,7 @@ public sealed class XmlTvWriterDtdConformanceTests
         await XmlTvWriter.WriteAsync(document, output, new XmlTvWriterOptions
         {
             OmitXmlDeclaration = true
-        });
+        }, TestContext.Current.CancellationToken);
 
         ValidateAgainstXmlTvDtd(output.ToString());
     }
@@ -63,7 +63,7 @@ public sealed class XmlTvWriterDtdConformanceTests
         await XmlTvWriter.WriteAsync(document, output, new XmlTvWriterOptions
         {
             OmitXmlDeclaration = true
-        });
+        }, TestContext.Current.CancellationToken);
 
         ValidateAgainstXmlTvDtd(output.ToString());
         Assert.DoesNotContain("<live", output.ToString(), StringComparison.Ordinal);

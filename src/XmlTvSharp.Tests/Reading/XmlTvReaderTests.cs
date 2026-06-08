@@ -23,7 +23,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         Assert.Equal("20260605", document.Metadata.Date!.ToXmlTvString());
         Assert.Equal("https://example.test/source", document.Metadata.SourceInfoUrl);
@@ -64,11 +64,11 @@ public sealed class XmlTvReaderTests
 
         using var reader = new XmlTvReader(new StringReader(xml));
 
-        var metadata = await reader.ReadMetadataAsync();
-        var first = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync());
-        var second = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync());
-        var third = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync());
-        var end = await reader.ReadElementAsync();
+        var metadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
+        var first = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var second = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var third = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var end = await reader.ReadElementAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("Generator", metadata.GeneratorInfoName);
         Assert.Equal("one", first.Id);
@@ -91,9 +91,9 @@ public sealed class XmlTvReaderTests
 
         using var reader = new XmlTvReader(new StringReader(xml));
 
-        var first = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync());
-        var second = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync());
-        var end = await reader.ReadElementAsync();
+        var first = Assert.IsType<XmlTvProgramme>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var second = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var end = await reader.ReadElementAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("one", first.ChannelId);
         Assert.Equal("one", second.Id);
@@ -109,8 +109,8 @@ public sealed class XmlTvReaderTests
 
         using var reader = new XmlTvReader(new StringReader(xml));
 
-        var metadata = await reader.ReadMetadataAsync();
-        var end = await reader.ReadElementAsync();
+        var metadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
+        var end = await reader.ReadElementAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("Source", metadata.SourceInfoName);
         Assert.Null(end);
@@ -127,9 +127,9 @@ public sealed class XmlTvReaderTests
 
         using var reader = new XmlTvReader(new StringReader(xml));
 
-        var element = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync());
-        var metadata = await reader.ReadMetadataAsync();
-        var cachedMetadata = await reader.ReadMetadataAsync();
+        var element = Assert.IsType<XmlTvChannel>(await reader.ReadElementAsync(TestContext.Current.CancellationToken));
+        var metadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
+        var cachedMetadata = await reader.ReadMetadataAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("one", element.Id);
         Assert.Same(metadata, cachedMetadata);
@@ -148,7 +148,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var channel = Assert.Single(document.Channels);
         var programme = Assert.Single(document.Programmes);
@@ -174,7 +174,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal("20260605120000 +0000", programme.Start.ToXmlTvString());
@@ -201,7 +201,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.True(programme.IsNew);
@@ -250,7 +250,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal("20260605123000 +0000", programme.Stop!.ToXmlTvString());
@@ -314,7 +314,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal(new XmlTvLocalizedText("Description", "en"), Assert.Single(programme.Descriptions));
@@ -349,7 +349,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var credits = Assert.Single(document.Programmes).Credits!;
         Assert.Equal("Writer", Assert.Single(credits.Writers).Text);
@@ -382,7 +382,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Collection(
@@ -420,7 +420,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -438,7 +438,7 @@ public sealed class XmlTvReaderTests
                     </tv>
                     """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -453,7 +453,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         Assert.True(Assert.Single(document.Programmes).IsNew);
     }
@@ -476,7 +476,7 @@ public sealed class XmlTvReaderTests
                     </tv>
                     """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -496,7 +496,7 @@ public sealed class XmlTvReaderTests
                     """;
 
         var exception =
-            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+            await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
 
         Assert.Contains(elementName, exception.Message, StringComparison.Ordinal);
         Assert.NotNull(exception.InnerException);
@@ -516,7 +516,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var actor = Assert.Single(Assert.Single(document.Programmes).Credits!.Actors);
         Assert.Collection(
@@ -544,7 +544,7 @@ public sealed class XmlTvReaderTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         var actor = Assert.Single(Assert.Single(document.Programmes).Credits!.Actors);
         Assert.Collection(
@@ -564,7 +564,7 @@ public sealed class XmlTvReaderTests
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
-        await XmlTvReader.ReadAsync(stream);
+        await XmlTvReader.ReadAsync(stream, TestContext.Current.CancellationToken);
 
         Assert.True(stream.CanRead);
     }

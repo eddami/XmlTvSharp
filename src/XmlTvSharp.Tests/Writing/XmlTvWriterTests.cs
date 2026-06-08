@@ -11,8 +11,8 @@ public sealed class XmlTvWriterTests
         var output = new StringBuilder();
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var document = XDocument.Parse(output.ToString());
         Assert.Equal("tv", document.Root!.Name.LocalName);
@@ -36,8 +36,8 @@ public sealed class XmlTvWriterTests
 
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync(metadata);
-        await writer.CompleteAsync();
+        await writer.StartAsync(metadata, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var root = XDocument.Parse(output.ToString()).Root!;
         Assert.Equal("20260605", (string?)root.Attribute("date"));
@@ -59,9 +59,9 @@ public sealed class XmlTvWriterTests
 
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
-        await writer.WriteChannelAsync(channel);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteChannelAsync(channel, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var channelElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("channel"));
         Assert.Equal("channel-one", (string?)channelElement.Attribute("id"));
@@ -101,9 +101,9 @@ public sealed class XmlTvWriterTests
 
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
         Assert.Equal("20260605120000 +0000", (string?)programmeElement.Attribute("start"));
@@ -130,7 +130,7 @@ public sealed class XmlTvWriterTests
         document.Programmes.Add(new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel-one", "News"));
         document.Channels.Add(new XmlTvChannel("channel-one", "Channel One"));
 
-        await XmlTvWriter.WriteAsync(document, new StringWriter(output));
+        await XmlTvWriter.WriteAsync(document, new StringWriter(output), TestContext.Current.CancellationToken);
 
         var root = XDocument.Parse(output.ToString()).Root!;
         Assert.Equal("Generator", (string?)root.Attribute("generator-info-name"));
@@ -143,7 +143,8 @@ public sealed class XmlTvWriterTests
         var output = new StringBuilder();
         var options = new XmlTvWriterOptions { OmitXmlDeclaration = true };
 
-        await XmlTvWriter.WriteAsync(new XmlTvDocument(), new StringWriter(output), options);
+        await XmlTvWriter.WriteAsync(new XmlTvDocument(), new StringWriter(output), options,
+            TestContext.Current.CancellationToken);
 
         Assert.StartsWith("<tv", output.ToString(), StringComparison.Ordinal);
     }
@@ -153,7 +154,7 @@ public sealed class XmlTvWriterTests
     {
         using var stream = new MemoryStream();
 
-        await XmlTvWriter.WriteAsync(new XmlTvDocument(), stream);
+        await XmlTvWriter.WriteAsync(new XmlTvDocument(), stream, TestContext.Current.CancellationToken);
 
         var bytes = stream.ToArray();
         Assert.False(bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF);
@@ -165,7 +166,7 @@ public sealed class XmlTvWriterTests
     {
         using var stream = new MemoryStream();
 
-        await XmlTvWriter.WriteAsync(new XmlTvDocument(), stream);
+        await XmlTvWriter.WriteAsync(new XmlTvDocument(), stream, TestContext.Current.CancellationToken);
 
         stream.WriteByte(0);
     }
@@ -176,7 +177,7 @@ public sealed class XmlTvWriterTests
         var output = new StringBuilder();
         using var textWriter = new StringWriter(output);
 
-        await XmlTvWriter.WriteAsync(new XmlTvDocument(), textWriter);
+        await XmlTvWriter.WriteAsync(new XmlTvDocument(), textWriter, TestContext.Current.CancellationToken);
 
         await textWriter.WriteAsync("<!-- still open -->");
     }
@@ -209,11 +210,12 @@ public sealed class XmlTvWriterTests
         var output = new StringBuilder();
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
-        await writer.WriteChannelAsync(new XmlTvChannel("channel-one", "One"));
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteChannelAsync(new XmlTvChannel("channel-one", "One"), TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() =>
-            writer.WriteChannelAsync(new XmlTvChannel("channel-one", "One Again")));
+            writer.WriteChannelAsync(new XmlTvChannel("channel-one", "One Again"),
+                TestContext.Current.CancellationToken));
 
         Assert.Contains("Duplicate channel id", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -226,9 +228,9 @@ public sealed class XmlTvWriterTests
         channel.DisplayNames.Clear();
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteChannelAsync(channel));
+        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteChannelAsync(channel, TestContext.Current.CancellationToken));
 
         Assert.Contains("channel-one", exception.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("<channel", output.ToString(), StringComparison.Ordinal);
@@ -242,9 +244,9 @@ public sealed class XmlTvWriterTests
         programme.Titles.Clear();
         using var writer = new XmlTvWriter(new StringWriter(output));
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme));
+        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
 
         Assert.Contains("channel-one", exception.Message, StringComparison.Ordinal);
         Assert.Contains("20260605120000 +0000", exception.Message, StringComparison.Ordinal);

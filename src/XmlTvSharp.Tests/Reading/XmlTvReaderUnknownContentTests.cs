@@ -18,7 +18,7 @@ public sealed class XmlTvReaderUnknownContentTests
             UnknownElementHandling = XmlTvUnknownContentHandling.Ignore
         };
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
         Assert.Equal(new XmlTvLocalizedText("News"), Assert.Single(programme.Titles));
@@ -36,7 +36,7 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
@@ -50,7 +50,7 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml)));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class XmlTvReaderUnknownContentTests
             UnknownAttributeHandling = XmlTvUnknownContentHandling.Ignore
         };
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options);
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
 
         Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
@@ -92,7 +92,7 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
 
         Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
@@ -110,6 +110,6 @@ public sealed class XmlTvReaderUnknownContentTests
             XExtensionHandling = XmlTvUnknownContentHandling.Disallow
         };
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), options));
+        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken));
     }
 }

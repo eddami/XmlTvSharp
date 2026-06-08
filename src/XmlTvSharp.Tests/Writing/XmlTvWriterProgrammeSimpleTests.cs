@@ -30,9 +30,9 @@ public sealed class XmlTvWriterProgrammeSimpleTests
 
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
         Assert.Equal(
@@ -105,9 +105,9 @@ public sealed class XmlTvWriterProgrammeSimpleTests
         programme.EpisodeNumbers.Add(new XmlTvEpisodeNumber("S1E2"));
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
-        await writer.WriteProgrammeAsync(programme);
-        await writer.CompleteAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
         var episodeNumber =
             Assert.Single(XDocument.Parse(output.ToString()).Root!.Element("programme")!.Elements("episode-num"));
@@ -123,9 +123,9 @@ public sealed class XmlTvWriterProgrammeSimpleTests
         programme.Categories.Add(null!);
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme));
+        await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
         Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
     }
 
@@ -137,9 +137,9 @@ public sealed class XmlTvWriterProgrammeSimpleTests
         programme.Descriptions.Add(new XmlTvLocalizedText(""));
         using var writer = new XmlTvWriter(output);
 
-        await writer.StartAsync();
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme));
+        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
         Assert.Contains("desc", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
     }
