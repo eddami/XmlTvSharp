@@ -263,6 +263,48 @@ public sealed class XmlTvReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_InvalidChannelId_SetsLineInformation()
+    {
+        const string xml = """
+                           <tv>
+                             <channel id="">
+                               <display-name>One</display-name>
+                             </channel>
+                           </tv>
+                           """;
+
+        var exception = await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+
+        Assert.Null(exception.InnerException);
+        Assert.Equal(2, exception.LineNumber);
+        Assert.Equal(4, exception.LinePosition);
+        Assert.Contains("Line ", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("position ", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ReadAsync_InvalidProgrammeStart_PreservesInnerExceptionAndLineInformation()
+    {
+        const string xml = """
+                           <tv>
+                             <programme start="not-a-date" channel="one">
+                               <title>News</title>
+                             </programme>
+                           </tv>
+                           """;
+
+        var exception = await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+
+        Assert.IsType<FormatException>(exception.InnerException);
+        Assert.Equal(2, exception.LineNumber);
+        Assert.Equal(4, exception.LinePosition);
+        Assert.Contains("Line ", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("position ", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ReadAsync_ParsesStandardProgrammeMetadata()
     {
         const string xml = """

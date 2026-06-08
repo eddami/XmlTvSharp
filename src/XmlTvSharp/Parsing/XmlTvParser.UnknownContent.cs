@@ -44,7 +44,10 @@ internal sealed partial class XmlTvParser
     {
         if (_reader is IXmlLineInfo lineInfo && lineInfo.HasLineInfo())
         {
-            return new XmlTvReadException($"{message} Line {lineInfo.LineNumber}, position {lineInfo.LinePosition}.");
+            return new XmlTvReadException(
+                $"{message} Line {lineInfo.LineNumber}, position {lineInfo.LinePosition}.",
+                lineInfo.LineNumber,
+                lineInfo.LinePosition);
         }
 
         return new XmlTvReadException(message);
@@ -56,6 +59,8 @@ internal sealed partial class XmlTvParser
         {
             return new XmlTvReadException(
                 $"{message} Line {lineInfo.LineNumber}, position {lineInfo.LinePosition}.",
+                lineInfo.LineNumber,
+                lineInfo.LinePosition,
                 innerException);
         }
 
