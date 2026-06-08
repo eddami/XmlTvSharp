@@ -5,10 +5,10 @@ public sealed class XmlTvChannelTests
     [Fact]
     public void Constructor_SeedsRequiredDisplayName()
     {
-        var channel = new XmlTvChannel("bbc-one", new XmlTvLocalizedText("BBC One", "en"));
+        var channel = new XmlTvChannel("channel-one", new XmlTvLocalizedText("Channel One", "en"));
 
-        Assert.Equal("bbc-one", channel.Id);
-        Assert.Equal(new XmlTvLocalizedText("BBC One", "en"), Assert.Single(channel.DisplayNames));
+        Assert.Equal("channel-one", channel.Id);
+        Assert.Equal(new XmlTvLocalizedText("Channel One", "en"), Assert.Single(channel.DisplayNames));
         Assert.Empty(channel.Icons);
         Assert.Empty(channel.Urls);
     }
@@ -16,10 +16,10 @@ public sealed class XmlTvChannelTests
     [Fact]
     public void Constructor_PreservesDisplayNameCollection()
     {
-        var first = new XmlTvLocalizedText("BBC One", "en");
-        var second = new XmlTvLocalizedText("BBC 1", "en-GB");
+        var first = new XmlTvLocalizedText("Channel One", "en");
+        var second = new XmlTvLocalizedText("Channel 1", "en-GB");
 
-        var channel = new XmlTvChannel("bbc-one", new[] { first, second });
+        var channel = new XmlTvChannel("channel-one", new[] { first, second });
 
         Assert.Equal(new[] { first, second }, channel.DisplayNames);
     }

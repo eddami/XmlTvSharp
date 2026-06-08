@@ -9,10 +9,10 @@ public sealed class XmlTvProgrammeTests
     {
         var start = XmlTvDateTime.FromDateTimeOffset(Start);
 
-        var programme = new XmlTvProgramme(start, "bbc-one", "News");
+        var programme = new XmlTvProgramme(start, "channel-one", "News");
 
         Assert.Same(start, programme.Start);
-        Assert.Equal("bbc-one", programme.ChannelId);
+        Assert.Equal("channel-one", programme.ChannelId);
         Assert.Equal(new XmlTvLocalizedText("News"), Assert.Single(programme.Titles));
         Assert.Null(programme.Stop);
         Assert.Equal(new XmlTvClumpIndex(0, 1), programme.EffectiveClumpIndex);
