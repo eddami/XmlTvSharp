@@ -9,9 +9,9 @@
         <Copyright>Copyright Mohamed Eddami</Copyright>
         <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
-        <PackageTags>xmltv;tv;epg;xml</PackageTags>
+        <PackageTags>xmltv;epg;tv;guide;xml;iptv;jellyfin;parser;writer</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Description>A high-performance, asynchronous XMLTV reader and writer for TV program data.</Description>
+        <Description>A high-performance XMLTV reader and writer for .NET.</Description>
         <MinVerTagPrefix>v</MinVerTagPrefix>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
