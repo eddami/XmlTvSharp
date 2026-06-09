@@ -30,6 +30,16 @@ public sealed class XmlTvDateTimeTests
     }
 
     [Theory]
+    [InlineData(" 2026 ", "2026")]
+    [InlineData("\t202606\r\n", "202606")]
+    [InlineData(" 2026060514\tUTC ", "2026060514 UTC")]
+    [InlineData("20260605143000  \t -0430", "20260605143000 -0430")]
+    public void Parse_Whitespace_ProducesCanonicalString(string source, string expected)
+    {
+        Assert.Equal(expected, XmlTvDateTime.Parse(source).ToXmlTvString());
+    }
+
+    [Theory]
     [InlineData("00010101000000 +0000")]
     [InlineData("20000229000000 +1400")]
     [InlineData("99991231235959 -1400")]

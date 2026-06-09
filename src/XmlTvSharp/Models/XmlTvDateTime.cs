@@ -71,27 +71,14 @@ public sealed record class XmlTvDateTime
     {
         XmlTvArgument.NotWhiteSpace(value, nameof(value));
 
-        var start = 0;
-        while (char.IsWhiteSpace(value[start]))
-        {
-            start++;
-        }
+        var source = value.AsSpan().Trim();
+        var separator = IndexOfWhiteSpace(source);
+        var componentText = separator < 0 ? source : source.Slice(0, separator);
+        var zoneText = separator < 0 ? ReadOnlySpan<char>.Empty : source.Slice(separator).Trim();
 
-        var end = value.Length - 1;
-        while (char.IsWhiteSpace(value[end]))
-        {
-            end--;
-        }
-
-        var separator = IndexOfWhiteSpace(value, start, end);
-        var componentLength = (separator < 0 ? end + 1 : separator) - start;
-        var zoneStart = separator < 0 ? -1 : FirstNonWhiteSpace(value, separator, end);
-        var zoneLength = zoneStart < 0 ? 0 : end - zoneStart + 1;
-        var zoneToken = zoneStart < 0 ? null : value.Substring(zoneStart, zoneLength);
-
-        if (componentLength is not (4 or 6 or 8 or 10 or 12 or 14) ||
-            !HasOnlyDigits(value, start, componentLength) ||
-            zoneToken?.Length == 0)
+        if (componentText.Length is not (4 or 6 or 8 or 10 or 12 or 14) ||
+            !HasOnlyDigits(componentText) ||
+            (separator >= 0 && zoneText.Length == 0))
         {
             throw new FormatException("Value is not a valid XMLTV date/time.");
         }
@@ -99,13 +86,13 @@ public sealed record class XmlTvDateTime
         try
         {
             return new XmlTvDateTime(
-                ParseComponent(value, start, 4),
-                ParseOptionalComponent(value, start, componentLength, 4),
-                ParseOptionalComponent(value, start, componentLength, 6),
-                ParseOptionalComponent(value, start, componentLength, 8),
-                ParseOptionalComponent(value, start, componentLength, 10),
-                ParseOptionalComponent(value, start, componentLength, 12),
-                CreateTimeZone(value, zoneStart, zoneLength, zoneToken));
+                ParseComponent(componentText.Slice(0, 4)),
+                ParseOptionalComponent(componentText, 4),
+                ParseOptionalComponent(componentText, 6),
+                ParseOptionalComponent(componentText, 8),
+                ParseOptionalComponent(componentText, 10),
+                ParseOptionalComponent(componentText, 12),
+                CreateTimeZone(zoneText));
         }
         catch (ArgumentException exception)
         {
@@ -180,6 +167,37 @@ public sealed record class XmlTvDateTime
     /// <returns>The XMLTV date/time string.</returns>
     public string ToXmlTvString()
     {
+#if NET8_0_OR_GREATER
+        var componentLength = Precision switch
+        {
+            XmlTvDateTimePrecision.Year => 4,
+            XmlTvDateTimePrecision.Month => 6,
+            XmlTvDateTimePrecision.Day => 8,
+            XmlTvDateTimePrecision.Hour => 10,
+            XmlTvDateTimePrecision.Minute => 12,
+            XmlTvDateTimePrecision.Second => 14,
+            _ => throw new InvalidOperationException("Date/time precision is invalid.")
+        };
+        var zone = Zone?.Value;
+        var length = componentLength + (zone is null ? 0 : zone.Length + 1);
+
+        return string.Create(length, this, static (target, value) =>
+        {
+            var index = 0;
+            WriteFourDigits(target, ref index, value.Year);
+            WriteOptionalDigits(target, ref index, value.Month);
+            WriteOptionalDigits(target, ref index, value.Day);
+            WriteOptionalDigits(target, ref index, value.Hour);
+            WriteOptionalDigits(target, ref index, value.Minute);
+            WriteOptionalDigits(target, ref index, value.Second);
+
+            if (value.Zone is not null)
+            {
+                target[index++] = ' ';
+                value.Zone.Value.AsSpan().CopyTo(target[index..]);
+            }
+        });
+#else
         var value = new StringBuilder(20);
         AppendFourDigits(value, Year);
         Append(value, Month);
@@ -195,6 +213,7 @@ public sealed record class XmlTvDateTime
         }
 
         return value.ToString();
+#endif
     }
 
     private DateTimeOffset ToDateTimeOffsetCore(XmlTvTimeZoneResolver? resolver)
@@ -290,9 +309,33 @@ public sealed record class XmlTvDateTime
         return XmlTvDateTimePrecision.Year;
     }
 
-    private static int IndexOfWhiteSpace(string value, int start, int end)
+#if NET8_0_OR_GREATER
+    private static void WriteOptionalDigits(Span<char> target, ref int index, int? component)
     {
-        for (var index = start; index <= end; index++)
+        if (component is not null)
+        {
+            WriteTwoDigits(target, ref index, component.Value);
+        }
+    }
+
+    private static void WriteFourDigits(Span<char> target, ref int index, int value)
+    {
+        target[index++] = (char)('0' + value / 1000 % 10);
+        target[index++] = (char)('0' + value / 100 % 10);
+        target[index++] = (char)('0' + value / 10 % 10);
+        target[index++] = (char)('0' + value % 10);
+    }
+
+    private static void WriteTwoDigits(Span<char> target, ref int index, int value)
+    {
+        target[index++] = (char)('0' + value / 10);
+        target[index++] = (char)('0' + value % 10);
+    }
+#endif
+
+    private static int IndexOfWhiteSpace(ReadOnlySpan<char> value)
+    {
+        for (var index = 0; index < value.Length; index++)
         {
             if (char.IsWhiteSpace(value[index]))
             {
@@ -303,22 +346,9 @@ public sealed record class XmlTvDateTime
         return -1;
     }
 
-    private static int FirstNonWhiteSpace(string value, int start, int end)
+    private static bool HasOnlyDigits(ReadOnlySpan<char> value)
     {
-        for (var index = start; index <= end; index++)
-        {
-            if (!char.IsWhiteSpace(value[index]))
-            {
-                return index;
-            }
-        }
-
-        return -1;
-    }
-
-    private static bool HasOnlyDigits(string value, int start, int length)
-    {
-        for (var index = start; index < start + length; index++)
+        for (var index = 0; index < value.Length; index++)
         {
             if (value[index] is < '0' or > '9')
             {
@@ -329,10 +359,10 @@ public sealed record class XmlTvDateTime
         return true;
     }
 
-    private static int ParseComponent(string value, int start, int length)
+    private static int ParseComponent(ReadOnlySpan<char> value)
     {
         var result = 0;
-        for (var index = start; index < start + length; index++)
+        for (var index = 0; index < value.Length; index++)
         {
             result = result * 10 + value[index] - '0';
         }
@@ -340,21 +370,22 @@ public sealed record class XmlTvDateTime
         return result;
     }
 
-    private static int? ParseOptionalComponent(string value, int start, int componentLength, int componentOffset)
+    private static int? ParseOptionalComponent(ReadOnlySpan<char> value, int componentOffset)
     {
-        return componentLength > componentOffset ? ParseComponent(value, start + componentOffset, 2) : null;
+        return value.Length > componentOffset ? ParseComponent(value.Slice(componentOffset, 2)) : null;
     }
 
-    private static XmlTvTimeZone? CreateTimeZone(string source, int start, int length, string? token)
+    private static XmlTvTimeZone? CreateTimeZone(ReadOnlySpan<char> token)
     {
-        if (token is null)
+        if (token.Length == 0)
         {
             return null;
         }
 
-        return XmlTvTimeZone.TryParseNumericOffset(source, start, length, out var offset)
-            ? XmlTvTimeZone.CreateNumeric(token, offset)
-            : new XmlTvTimeZone(token);
+        var value = token.ToString();
+        return XmlTvTimeZone.TryParseNumericOffset(token, out var offset)
+            ? XmlTvTimeZone.CreateNumeric(value, offset)
+            : new XmlTvTimeZone(value);
     }
 
     private static void Append(StringBuilder target, int? component)

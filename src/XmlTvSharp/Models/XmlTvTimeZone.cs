@@ -16,12 +16,12 @@ public sealed record XmlTvTimeZone
     {
         Value = XmlTvArgument.NotWhiteSpace(value, nameof(value));
 
-        if (ContainsWhiteSpace(Value))
+        if (ContainsWhiteSpace(Value.AsSpan()))
         {
             throw new ArgumentException("A timezone token cannot contain whitespace.", nameof(value));
         }
 
-        UtcOffset = TryParseNumericOffset(Value, 0, Value.Length, out var offset) ? offset : null;
+        UtcOffset = TryParseNumericOffset(Value.AsSpan(), out var offset) ? offset : null;
         if ((Value[0] == '+' || Value[0] == '-') && UtcOffset is null)
         {
             throw new ArgumentException("A numeric timezone token must use the form +HHMM, -HHMM, +HH:MM, or -HH:MM.",
@@ -68,38 +68,35 @@ public sealed record XmlTvTimeZone
         return new XmlTvTimeZone(value, offset);
     }
 
-    internal static bool TryParseNumericOffset(string value, int start, int length, out TimeSpan offset)
+    internal static bool TryParseNumericOffset(ReadOnlySpan<char> value, out TimeSpan offset)
     {
         offset = default;
 
-        if (length is not (5 or 6) ||
-            start < 0 ||
-            start + length > value.Length ||
-            (value[start] != '+' && value[start] != '-'))
+        if (value.Length is not (5 or 6) || (value[0] != '+' && value[0] != '-'))
         {
             return false;
         }
 
-        var minuteStart = start + 3;
-        if (length == 6)
+        var minuteStart = 3;
+        if (value.Length == 6)
         {
-            if (value[start + 3] != ':')
+            if (value[3] != ':')
             {
                 return false;
             }
 
-            minuteStart = start + 4;
+            minuteStart = 4;
         }
 
-        if (!TryParseTwoDigits(value, start + 1, out var hours) ||
-            !TryParseTwoDigits(value, minuteStart, out var minutes) ||
+        if (!TryParseTwoDigits(value.Slice(1, 2), out var hours) ||
+            !TryParseTwoDigits(value.Slice(minuteStart, 2), out var minutes) ||
             minutes > 59)
         {
             return false;
         }
 
         offset = new TimeSpan(hours, minutes, 0);
-        if (value[start] == '-')
+        if (value[0] == '-')
         {
             offset = -offset;
         }
@@ -123,6 +120,16 @@ public sealed record XmlTvTimeZone
         var hours = absolute.Hours;
         var minutes = absolute.Minutes;
 
+#if NET8_0_OR_GREATER
+        return string.Create(5, (sign, hours, minutes), static (target, state) =>
+        {
+            target[0] = state.sign;
+            target[1] = (char)('0' + state.hours / 10);
+            target[2] = (char)('0' + state.hours % 10);
+            target[3] = (char)('0' + state.minutes / 10);
+            target[4] = (char)('0' + state.minutes % 10);
+        });
+#else
         return new string(
         [
             sign,
@@ -131,24 +138,23 @@ public sealed record XmlTvTimeZone
             (char)('0' + minutes / 10),
             (char)('0' + minutes % 10)
         ]);
+#endif
     }
 
-    private static bool TryParseTwoDigits(string value, int start, out int result)
+    private static bool TryParseTwoDigits(ReadOnlySpan<char> value, out int result)
     {
         result = 0;
 
-        if (start + 1 >= value.Length ||
-            value[start] is < '0' or > '9' ||
-            value[start + 1] is < '0' or > '9')
+        if (value.Length != 2 || value[0] is < '0' or > '9' || value[1] is < '0' or > '9')
         {
             return false;
         }
 
-        result = (value[start] - '0') * 10 + value[start + 1] - '0';
+        result = (value[0] - '0') * 10 + value[1] - '0';
         return true;
     }
 
-    private static bool ContainsWhiteSpace(string value)
+    private static bool ContainsWhiteSpace(ReadOnlySpan<char> value)
     {
         for (var index = 0; index < value.Length; index++)
         {

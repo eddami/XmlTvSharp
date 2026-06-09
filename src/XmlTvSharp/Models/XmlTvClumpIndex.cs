@@ -40,12 +40,13 @@ public sealed record XmlTvClumpIndex
     {
         XmlTvArgument.NotWhiteSpace(value, nameof(value));
 
-        var separator = value.IndexOf('/');
+        var source = value.AsSpan();
+        var separator = source.IndexOf('/');
         if (separator <= 0 ||
-            separator == value.Length - 1 ||
-            value.IndexOf('/', separator + 1) >= 0 ||
-            !TryParseNonNegativeInt(value, 0, separator, out var index) ||
-            !TryParseNonNegativeInt(value, separator + 1, value.Length - separator - 1, out var count))
+            separator == source.Length - 1 ||
+            source.Slice(separator + 1).IndexOf('/') >= 0 ||
+            !TryParseNonNegativeInt(source.Slice(0, separator), out var index) ||
+            !TryParseNonNegativeInt(source.Slice(separator + 1), out var count))
         {
             throw new FormatException("Value is not a valid XMLTV clump index.");
         }
@@ -90,11 +91,11 @@ public sealed record XmlTvClumpIndex
         return Index + "/" + Count;
     }
 
-    private static bool TryParseNonNegativeInt(string value, int start, int length, out int result)
+    private static bool TryParseNonNegativeInt(ReadOnlySpan<char> value, out int result)
     {
         result = 0;
 
-        for (var index = start; index < start + length; index++)
+        for (var index = 0; index < value.Length; index++)
         {
             var digit = value[index] - '0';
             if (digit is < 0 or > 9)

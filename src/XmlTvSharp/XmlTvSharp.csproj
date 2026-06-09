@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Title>XmlTvSharp</Title>
         <Authors>Mohamed Eddami</Authors>
-        <Copyright>Copyright Mohamed Eddami</Copyright>
+        <Copyright>Copyright © Mohamed Eddami</Copyright>
         <PackageProjectUrl>https://github.com/eddami/XmlTvSharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/eddami/XmlTvSharp</RepositoryUrl>
         <PackageTags>xmltv;epg;tv;guide;xml;iptv;jellyfin;parser;writer</PackageTags>
@@ -29,6 +29,10 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <None Include="../../README.md" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="System.Memory" Version="4.6.3"/>
     </ItemGroup>
 
 </Project>
