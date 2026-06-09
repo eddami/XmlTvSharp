@@ -127,6 +127,21 @@ public sealed class XmlTvDateTimeTests
         Assert.Equal(new DateTimeOffset(2026, 6, 5, 14, 30, 0, TimeSpan.FromMinutes(-270)), instant);
     }
 
+    [Theory]
+    [InlineData("20260605143000 +0000", 0)]
+    [InlineData("20260605143000 -0000", 0)]
+    [InlineData("20260605143000 +09:30", 570)]
+    [InlineData("20260605143000 -0430", -270)]
+    public void ToDateTimeOffset_NumericZone_PreservesTokenAndUsesParsedOffset(string source, int expectedMinutes)
+    {
+        var value = XmlTvDateTime.Parse(source);
+
+        var instant = value.ToDateTimeOffset();
+
+        Assert.Equal(source, value.ToXmlTvString());
+        Assert.Equal(TimeSpan.FromMinutes(expectedMinutes), instant.Offset);
+    }
+
     [Fact]
     public void ToDateTimeOffset_ColonizedNumericZone_PreservesTokenAndUsesParsedOffset()
     {

@@ -86,7 +86,8 @@ public sealed record class XmlTvDateTime
         var separator = IndexOfWhiteSpace(value, start, end);
         var componentLength = (separator < 0 ? end + 1 : separator) - start;
         var zoneStart = separator < 0 ? -1 : FirstNonWhiteSpace(value, separator, end);
-        var zoneToken = zoneStart < 0 ? null : value.Substring(zoneStart, end - zoneStart + 1);
+        var zoneLength = zoneStart < 0 ? 0 : end - zoneStart + 1;
+        var zoneToken = zoneStart < 0 ? null : value.Substring(zoneStart, zoneLength);
 
         if (componentLength is not (4 or 6 or 8 or 10 or 12 or 14) ||
             !HasOnlyDigits(value, start, componentLength) ||
@@ -104,7 +105,7 @@ public sealed record class XmlTvDateTime
                 ParseOptionalComponent(value, start, componentLength, 8),
                 ParseOptionalComponent(value, start, componentLength, 10),
                 ParseOptionalComponent(value, start, componentLength, 12),
-                zoneToken is null ? null : new XmlTvTimeZone(zoneToken));
+                CreateTimeZone(value, zoneStart, zoneLength, zoneToken));
         }
         catch (ArgumentException exception)
         {
@@ -342,6 +343,18 @@ public sealed record class XmlTvDateTime
     private static int? ParseOptionalComponent(string value, int start, int componentLength, int componentOffset)
     {
         return componentLength > componentOffset ? ParseComponent(value, start + componentOffset, 2) : null;
+    }
+
+    private static XmlTvTimeZone? CreateTimeZone(string source, int start, int length, string? token)
+    {
+        if (token is null)
+        {
+            return null;
+        }
+
+        return XmlTvTimeZone.TryParseNumericOffset(source, start, length, out var offset)
+            ? XmlTvTimeZone.CreateNumeric(token, offset)
+            : new XmlTvTimeZone(token);
     }
 
     private static void Append(StringBuilder target, int? component)

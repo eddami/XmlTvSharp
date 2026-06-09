@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace XmlTvSharp.Models;
 
 /// <summary>
@@ -23,7 +21,7 @@ public sealed record XmlTvTimeZone
             throw new ArgumentException("A timezone token cannot contain whitespace.", nameof(value));
         }
 
-        UtcOffset = ParseNumericOffset(Value);
+        UtcOffset = TryParseNumericOffset(Value, 0, Value.Length, out var offset) ? offset : null;
         if ((Value[0] == '+' || Value[0] == '-') && UtcOffset is null)
         {
             throw new ArgumentException("A numeric timezone token must use the form +HHMM, -HHMM, +HH:MM, or -HH:MM.",
@@ -49,16 +47,7 @@ public sealed record XmlTvTimeZone
     {
         ValidateOffset(offset, nameof(offset));
 
-        var sign = offset < TimeSpan.Zero ? '-' : '+';
-        var absolute = offset.Duration();
-        var value = string.Format(
-            CultureInfo.InvariantCulture,
-            "{0}{1:00}{2:00}",
-            sign,
-            absolute.Hours,
-            absolute.Minutes);
-
-        return new XmlTvTimeZone(value);
+        return CreateNumeric(CreateNumericToken(offset), offset);
     }
 
     internal static void ValidateOffset(TimeSpan offset, string parameterName)
@@ -74,40 +63,74 @@ public sealed record XmlTvTimeZone
         }
     }
 
-    private static TimeSpan? ParseNumericOffset(string value)
+    internal static XmlTvTimeZone CreateNumeric(string value, TimeSpan offset)
     {
-        if (value.Length is not (5 or 6) ||
-            (value[0] != '+' && value[0] != '-'))
+        return new XmlTvTimeZone(value, offset);
+    }
+
+    internal static bool TryParseNumericOffset(string value, int start, int length, out TimeSpan offset)
+    {
+        offset = default;
+
+        if (length is not (5 or 6) ||
+            start < 0 ||
+            start + length > value.Length ||
+            (value[start] != '+' && value[start] != '-'))
         {
-            return null;
+            return false;
         }
 
-        var minuteStart = 3;
-        if (value.Length == 6)
+        var minuteStart = start + 3;
+        if (length == 6)
         {
-            if (value[3] != ':')
+            if (value[start + 3] != ':')
             {
-                return null;
+                return false;
             }
 
-            minuteStart = 4;
+            minuteStart = start + 4;
         }
 
-        if (!TryParseTwoDigits(value, 1, out var hours) ||
+        if (!TryParseTwoDigits(value, start + 1, out var hours) ||
             !TryParseTwoDigits(value, minuteStart, out var minutes) ||
             minutes > 59)
         {
-            return null;
+            return false;
         }
 
-        var offset = new TimeSpan(hours, minutes, 0);
-        if (value[0] == '-')
+        offset = new TimeSpan(hours, minutes, 0);
+        if (value[start] == '-')
         {
             offset = -offset;
         }
 
         ValidateOffset(offset, nameof(value));
-        return offset;
+        return true;
+    }
+
+    private XmlTvTimeZone(string value, TimeSpan offset)
+    {
+        Value = XmlTvArgument.NotWhiteSpace(value, nameof(value));
+        ValidateOffset(offset, nameof(offset));
+        UtcOffset = offset;
+        IsNumericOffset = true;
+    }
+
+    private static string CreateNumericToken(TimeSpan offset)
+    {
+        var sign = offset < TimeSpan.Zero ? '-' : '+';
+        var absolute = offset.Duration();
+        var hours = absolute.Hours;
+        var minutes = absolute.Minutes;
+
+        return new string(
+        [
+            sign,
+            (char)('0' + hours / 10),
+            (char)('0' + hours % 10),
+            (char)('0' + minutes / 10),
+            (char)('0' + minutes % 10)
+        ]);
     }
 
     private static bool TryParseTwoDigits(string value, int start, out int result)
