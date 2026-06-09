@@ -15,13 +15,15 @@ A high-performance XMLTV reader and writer for .NET.
 - Forward-only access to top-level channels and programmes.
 - Preserve XMLTV date/time values with `XmlTvDateTime`.
 - Use the standard XMLTV profile or supported compatibility profiles such as Jellyfin.
-- Target `netstandard2.0`.
+- Support .NET 8 and newer, with .NET Standard 2.0 compatibility for older runtimes.
 
 ## Installation
 
 ```bash
 dotnet add package XmlTvSharp
 ```
+
+XmlTvSharp supports .NET 8 and newer, including .NET 10. Older compatible runtimes can use the .NET Standard 2.0 build.
 
 ## Reading
 

@@ -6,7 +6,7 @@ Install the package from NuGet:
 dotnet add package XmlTvSharp
 ```
 
-XmlTvSharp targets `netstandard2.0`, so it can be used from modern .NET applications and libraries that support that target.
+XmlTvSharp supports .NET 8 and newer, including .NET 10. Older compatible runtimes can use the .NET Standard 2.0 build.
 
 ## Read a Document
 
