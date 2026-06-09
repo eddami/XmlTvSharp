@@ -400,7 +400,7 @@ internal sealed partial class XmlTvParser
         ValidateAttributes(XmlTvNames.Attributes.System);
 
         var system = _reader.GetAttribute(XmlTvNames.Attributes.System);
-        var icons = new List<XmlTvIcon>();
+        List<XmlTvIcon>? icons = null;
         string? value = null;
         var hasValue = false;
 
@@ -440,7 +440,7 @@ internal sealed partial class XmlTvParser
                 case XmlTvNames.Elements.Icon:
                     if (ReadIcon() is { } icon)
                     {
-                        icons.Add(icon);
+                        (icons ??= []).Add(icon);
                     }
 
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
@@ -467,10 +467,7 @@ internal sealed partial class XmlTvParser
             throw ReadError("Element 'rating' value cannot be empty.", exception);
         }
 
-        foreach (var icon in icons)
-        {
-            rating.Icons.Add(icon);
-        }
+        AddRange(rating.Icons, icons);
 
         return rating;
     }
@@ -480,7 +477,7 @@ internal sealed partial class XmlTvParser
         ValidateAttributes(XmlTvNames.Attributes.System);
 
         var system = _reader.GetAttribute(XmlTvNames.Attributes.System);
-        var icons = new List<XmlTvIcon>();
+        List<XmlTvIcon>? icons = null;
         string? value = null;
         var hasValue = false;
 
@@ -520,7 +517,7 @@ internal sealed partial class XmlTvParser
                 case XmlTvNames.Elements.Icon:
                     if (ReadIcon() is { } icon)
                     {
-                        icons.Add(icon);
+                        (icons ??= []).Add(icon);
                     }
 
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
@@ -547,10 +544,7 @@ internal sealed partial class XmlTvParser
             throw ReadError("Element 'star-rating' value cannot be empty.", exception);
         }
 
-        foreach (var icon in icons)
-        {
-            rating.Icons.Add(icon);
-        }
+        AddRange(rating.Icons, icons);
 
         return rating;
     }

@@ -12,8 +12,8 @@ internal sealed partial class XmlTvParser
 
         var id = RequiredAttribute(XmlTvNames.Attributes.Id);
         var displayNames = new List<XmlTvLocalizedText>();
-        var icons = new List<XmlTvIcon>();
-        var urls = new List<XmlTvUrl>();
+        List<XmlTvIcon>? icons = null;
+        List<XmlTvUrl>? urls = null;
 
         if (_reader.IsEmptyElement)
         {
@@ -50,13 +50,13 @@ internal sealed partial class XmlTvParser
                 case XmlTvNames.Elements.Icon:
                     if (ReadIcon() is { } icon)
                     {
-                        icons.Add(icon);
+                        (icons ??= []).Add(icon);
                     }
 
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
                     continue;
                 case XmlTvNames.Elements.Url:
-                    urls.Add(await ReadUrlAsync(cancellationToken).ConfigureAwait(false));
+                    (urls ??= []).Add(await ReadUrlAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 default:
                     await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Channel, cancellationToken)

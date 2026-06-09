@@ -340,8 +340,13 @@ internal sealed partial class XmlTvParser
         throw ReadError($"Element '{elementName}' must be empty.");
     }
 
-    private static void AddRange<T>(Collection<T> target, IEnumerable<T> source)
+    private static void AddRange<T>(Collection<T> target, IEnumerable<T>? source)
     {
+        if (source is null)
+        {
+            return;
+        }
+
         foreach (var item in source)
         {
             target.Add(item);

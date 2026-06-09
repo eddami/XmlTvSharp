@@ -29,19 +29,19 @@ internal sealed partial class XmlTvParser
         var clumpIndex = ReadOptionalClumpIndexAttribute(XmlTvNames.Attributes.ClumpIndex);
 
         var titles = new List<XmlTvLocalizedText>();
-        var subTitles = new List<XmlTvLocalizedText>();
-        var descriptions = new List<XmlTvLocalizedText>();
-        var categories = new List<XmlTvLocalizedText>();
-        var keywords = new List<XmlTvLocalizedText>();
-        var icons = new List<XmlTvIcon>();
-        var urls = new List<XmlTvUrl>();
-        var countries = new List<XmlTvLocalizedText>();
-        var episodeNumbers = new List<XmlTvEpisodeNumber>();
-        var subtitles = new List<XmlTvSubtitles>();
-        var ratings = new List<XmlTvRating>();
-        var starRatings = new List<XmlTvStarRating>();
-        var reviews = new List<XmlTvReview>();
-        var images = new List<XmlTvImage>();
+        List<XmlTvLocalizedText>? subTitles = null;
+        List<XmlTvLocalizedText>? descriptions = null;
+        List<XmlTvLocalizedText>? categories = null;
+        List<XmlTvLocalizedText>? keywords = null;
+        List<XmlTvIcon>? icons = null;
+        List<XmlTvUrl>? urls = null;
+        List<XmlTvLocalizedText>? countries = null;
+        List<XmlTvEpisodeNumber>? episodeNumbers = null;
+        List<XmlTvSubtitles>? subtitles = null;
+        List<XmlTvRating>? ratings = null;
+        List<XmlTvStarRating>? starRatings = null;
+        List<XmlTvReview>? reviews = null;
+        List<XmlTvImage>? images = null;
         XmlTvCredits? credits = null;
         XmlTvDateTime? date = null;
         XmlTvLocalizedText? language = null;
@@ -99,11 +99,11 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.SubTitle:
-                    subTitles.Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.SubTitle, false, cancellationToken)
+                    (subTitles ??= []).Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.SubTitle, false, cancellationToken)
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Desc:
-                    descriptions.Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Desc, true, cancellationToken)
+                    (descriptions ??= []).Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Desc, true, cancellationToken)
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Credits:
@@ -116,11 +116,11 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false);
                     continue;
                 case XmlTvNames.Elements.Category:
-                    categories.Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Category, false, cancellationToken)
+                    (categories ??= []).Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Category, false, cancellationToken)
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Keyword:
-                    keywords.Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Keyword, false, cancellationToken)
+                    (keywords ??= []).Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Keyword, false, cancellationToken)
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Language:
@@ -141,20 +141,20 @@ internal sealed partial class XmlTvParser
                 case XmlTvNames.Elements.Icon:
                     if (ReadIcon() is { } icon)
                     {
-                        icons.Add(icon);
+                        (icons ??= []).Add(icon);
                     }
 
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
                     continue;
                 case XmlTvNames.Elements.Url:
-                    urls.Add(await ReadUrlAsync(cancellationToken).ConfigureAwait(false));
+                    (urls ??= []).Add(await ReadUrlAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Country:
-                    countries.Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Country, false, cancellationToken)
+                    (countries ??= []).Add(await ReadLocalizedTextAsync(XmlTvNames.Elements.Country, false, cancellationToken)
                         .ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.EpisodeNumber:
-                    episodeNumbers.Add(await ReadEpisodeNumberAsync(cancellationToken).ConfigureAwait(false));
+                    (episodeNumbers ??= []).Add(await ReadEpisodeNumberAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Video:
                     EnsureNotSeen(ref hasVideo, XmlTvNames.Elements.Video);
@@ -193,19 +193,19 @@ internal sealed partial class XmlTvParser
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Live, cancellationToken).ConfigureAwait(false);
                     continue;
                 case XmlTvNames.Elements.Subtitles:
-                    subtitles.Add(await ReadSubtitlesAsync(cancellationToken).ConfigureAwait(false));
+                    (subtitles ??= []).Add(await ReadSubtitlesAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Rating:
-                    ratings.Add(await ReadRatingAsync(cancellationToken).ConfigureAwait(false));
+                    (ratings ??= []).Add(await ReadRatingAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.StarRating:
-                    starRatings.Add(await ReadStarRatingAsync(cancellationToken).ConfigureAwait(false));
+                    (starRatings ??= []).Add(await ReadStarRatingAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Review:
-                    reviews.Add(await ReadReviewAsync(cancellationToken).ConfigureAwait(false));
+                    (reviews ??= []).Add(await ReadReviewAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 case XmlTvNames.Elements.Image:
-                    images.Add(await ReadImageAsync(cancellationToken).ConfigureAwait(false));
+                    (images ??= []).Add(await ReadImageAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 default:
                     await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Programme, cancellationToken)
