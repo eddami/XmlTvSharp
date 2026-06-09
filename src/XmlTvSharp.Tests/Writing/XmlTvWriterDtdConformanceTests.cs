@@ -54,9 +54,12 @@ public sealed class XmlTvWriterDtdConformanceTests
         var document = new XmlTvDocument();
         var programme = new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel-one.tv",
             "Live Programme");
-        programme.Extensions.Jellyfin = new XmlTvJellyfinProgrammeExtensions
+        programme.Extensions = new XmlTvProgrammeExtensions
         {
-            IsLive = true
+            Jellyfin = new XmlTvJellyfinProgrammeExtensions
+            {
+                IsLive = true
+            }
         };
         document.Programmes.Add(programme);
 

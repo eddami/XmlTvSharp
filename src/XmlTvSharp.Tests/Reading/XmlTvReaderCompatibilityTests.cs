@@ -21,7 +21,7 @@ public sealed class XmlTvReaderCompatibilityTests
         var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(document.Programmes);
-        Assert.True(programme.Extensions.Jellyfin?.IsLive);
+        Assert.True(programme.Extensions?.Jellyfin?.IsLive);
     }
 
     [Fact]

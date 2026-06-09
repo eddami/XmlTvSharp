@@ -129,7 +129,7 @@ internal sealed partial class XmlTvElementWriter
         }
 
         if (_options.CompatibilityProfile == XmlTvCompatibilityProfile.Jellyfin &&
-            programme.Extensions.Jellyfin is { IsLive: true })
+            programme.Extensions?.Jellyfin is { IsLive: true })
         {
             await WriteEmptyElementAsync(XmlTvNames.Elements.Live).ConfigureAwait(false);
         }

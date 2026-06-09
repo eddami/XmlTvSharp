@@ -160,6 +160,6 @@ public sealed class XmlTvProgramme : IXmlTvElement
     /// <summary>Gets images in XML order.</summary>
     public Collection<XmlTvImage> Images { get; } = [];
 
-    /// <summary>Gets programme data defined by supported XMLTV dialects.</summary>
-    public XmlTvProgrammeExtensions Extensions { get; } = new();
+    /// <summary>Gets or sets programme data defined by supported XMLTV dialects.</summary>
+    public XmlTvProgrammeExtensions? Extensions { get; set; }
 }

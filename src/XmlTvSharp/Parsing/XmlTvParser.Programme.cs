@@ -255,7 +255,10 @@ internal sealed partial class XmlTvParser
         AddRange(programme.Images, images);
         if (isLive)
         {
-            programme.Extensions.Jellyfin = new XmlTvJellyfinProgrammeExtensions { IsLive = true };
+            programme.Extensions = new XmlTvProgrammeExtensions
+            {
+                Jellyfin = new XmlTvJellyfinProgrammeExtensions { IsLive = true }
+            };
         }
 
         return programme;

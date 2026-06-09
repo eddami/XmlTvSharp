@@ -66,15 +66,18 @@ public sealed class XmlTvWriterCompatibilityTests
         var roundTripped = await XmlTvReader.ReadAsync(new StringReader(output.ToString()), options, TestContext.Current.CancellationToken);
 
         var programme = Assert.Single(roundTripped.Programmes);
-        Assert.True(programme.Extensions.Jellyfin?.IsLive);
+        Assert.True(programme.Extensions?.Jellyfin?.IsLive);
     }
 
     private static XmlTvProgramme CreateLiveProgramme()
     {
         var programme = new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel-one", "News");
-        programme.Extensions.Jellyfin = new XmlTvJellyfinProgrammeExtensions
+        programme.Extensions = new XmlTvProgrammeExtensions
         {
-            IsLive = true
+            Jellyfin = new XmlTvJellyfinProgrammeExtensions
+            {
+                IsLive = true
+            }
         };
 
         return programme;

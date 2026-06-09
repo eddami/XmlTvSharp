@@ -19,7 +19,7 @@ public sealed class XmlTvProgrammeTests
         Assert.Empty(programme.Categories);
         Assert.Empty(programme.Ratings);
         Assert.Empty(programme.Images);
-        Assert.NotNull(programme.Extensions);
+        Assert.Null(programme.Extensions);
     }
 
     [Fact]
@@ -62,9 +62,12 @@ public sealed class XmlTvProgrammeTests
     {
         var programme = new XmlTvProgramme(Start, "channel", "Title");
 
-        Assert.Null(programme.Extensions.Jellyfin);
+        Assert.Null(programme.Extensions);
 
-        programme.Extensions.Jellyfin = new XmlTvJellyfinProgrammeExtensions { IsLive = true };
+        programme.Extensions = new XmlTvProgrammeExtensions
+        {
+            Jellyfin = new XmlTvJellyfinProgrammeExtensions { IsLive = true }
+        };
 
         Assert.True(programme.Extensions.Jellyfin.IsLive);
     }
