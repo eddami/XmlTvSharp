@@ -1,12 +1,6 @@
 name: Docs
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -42,17 +36,14 @@ jobs:
         working-directory: docs
         run: pnpm build
       - name: Setup Pages
-        if: github.event_name == 'push'
         uses: actions/configure-pages@v5
       - name: Upload artifact
-        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v4
         with:
           path: docs/.vitepress/dist
 
   deploy:
     needs: build
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
