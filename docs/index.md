@@ -21,12 +21,12 @@ features:
     details: Write a complete document or emit channels and programmes in order.
     link: /writing
     linkText: Write guide
-  - title: Run Anywhere
-    details: Supports .NET 8 and newer, with .NET Standard 2.0 compatibility for older runtimes.
-    link: /getting-started
-    linkText: Get started
   - title: Date and Time
     details: Preserve precision and timezone tokens with XmlTvDateTime.
     link: /date-time
     linkText: Date guide
+  - title: Filtering
+    details: Skip unwanted channels and programmes before models are materialized.
+    link: /filtering
+    linkText: Filter guide
 ---

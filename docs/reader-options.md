@@ -25,8 +25,6 @@ The default is `XmlTvCompatibilityProfile.Standard`. See [Compatibility Profiles
 
 `UnknownAttributeHandling` controls unsupported attributes.
 
-XMLTV `x-*` extension elements and attributes follow the same two settings.
-
 The default is `Disallow`, which raises `XmlTvReadException` when unsupported content is encountered.
 
 Use `Ignore` when you intentionally want to skip unknown content from feeds that contain provider-specific additions.
