@@ -20,7 +20,11 @@ internal sealed partial class XmlTvElementWriter
     {
         await _writer.WriteStartElementAsync(null, elementName, null).ConfigureAwait(false);
         await WriteOptionalAttributeAsync(XmlTvNames.Attributes.Lang, text.Language).ConfigureAwait(false);
-        await _writer.WriteStringAsync(text.Value).ConfigureAwait(false);
+        if (text.Value.Length > 0)
+        {
+            await _writer.WriteStringAsync(text.Value).ConfigureAwait(false);
+        }
+
         await _writer.WriteEndElementAsync().ConfigureAwait(false);
     }
 

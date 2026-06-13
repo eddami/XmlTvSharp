@@ -130,7 +130,7 @@ public sealed class XmlTvWriterProgrammeSimpleTests
     }
 
     [Fact]
-    public async Task WriteProgrammeAsync_EmptyDescription_ThrowsXmlTvWriteExceptionBeforeEmittingProgramme()
+    public async Task WriteProgrammeAsync_EmptyDescription_WritesPresentEmptyDescElement()
     {
         var output = new StringWriter();
         var programme = new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel-one", "Title");
@@ -138,9 +138,11 @@ public sealed class XmlTvWriterProgrammeSimpleTests
         using var writer = new XmlTvWriter(output);
 
         await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
-        Assert.Contains("desc", exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
+        Assert.Contains("<desc />", output.ToString(), StringComparison.Ordinal);
+        var desc = Assert.Single(XDocument.Parse(output.ToString()).Root!.Element("programme")!.Elements("desc"));
+        Assert.Empty(desc.Value);
     }
 }

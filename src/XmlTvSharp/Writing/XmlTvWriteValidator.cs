@@ -71,11 +71,6 @@ internal static class XmlTvWriteValidator
             RequireLocalizedText(subTitle, "Programme sub-title cannot be empty.");
         }
 
-        foreach (var description in programme.Descriptions)
-        {
-            RequireLocalizedText(description, "Programme desc cannot be empty.");
-        }
-
         foreach (var category in programme.Categories)
         {
             RequireLocalizedText(category, "Programme category cannot be empty.");
