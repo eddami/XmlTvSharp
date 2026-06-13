@@ -54,6 +54,18 @@ programme.Urls.Add(new XmlTvUrl("https://example.test/programme"));
 
 The model is editable. The writer validates required fields when writing.
 
+An empty collection means no repeated elements are present. For elements where
+XMLTV permits empty text, an item with `Value == string.Empty` means the element
+is present with empty text:
+
+```csharp
+// No desc element.
+programme.Descriptions.Clear();
+
+// Present empty desc element.
+programme.Descriptions.Add(new XmlTvLocalizedText(""));
+```
+
 ## Value Types
 
 Common leaf values have dedicated models:

@@ -29,6 +29,10 @@ The default is `Disallow`, which raises `XmlTvReadException` when unsupported co
 
 Use `Ignore` when you intentionally want to skip unknown content from feeds that contain provider-specific additions.
 
+Unknown-content handling does not relax validation for recognized XMLTV content.
+Required values such as programme titles and required attributes are still
+validated.
+
 ## Reader Exceptions
 
 Read failures are reported as `XmlTvReadException`. When line information is available, the exception includes `LineNumber` and `LinePosition`.
