@@ -158,7 +158,7 @@ public sealed class XmlTvWriterProgrammeComplexTests
     [InlineData("audio-stereo")]
     [InlineData("video-aspect")]
     [InlineData("video-quality")]
-    public async Task WriteProgrammeAsync_EmptyOptionalMediaText_ThrowsXmlTvWriteExceptionBeforeEmittingProgramme(
+    public async Task WriteProgrammeAsync_EmptyOptionalMediaText_WritesPresentEmptyElement(
         string field)
     {
         var output = new StringWriter();
@@ -179,9 +179,20 @@ public sealed class XmlTvWriterProgrammeComplexTests
         using var writer = new XmlTvWriter(output);
 
         await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<XmlTvWriteException>(() => writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken));
-        Assert.Contains(field, exception.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("<programme", output.ToString(), StringComparison.Ordinal);
+        var programmeElement = Assert.Single(XDocument.Parse(output.ToString()).Root!.Elements("programme"));
+        var elementName = field switch
+        {
+            "audio-stereo" => "stereo",
+            "video-aspect" => "aspect",
+            _ => "quality"
+        };
+        var mediaElementName = field == "audio-stereo" ? "audio" : "video";
+        var mediaElement = Assert.Single(programmeElement.Elements(mediaElementName));
+        var emptyElement = Assert.Single(mediaElement.Elements(elementName));
+        Assert.Empty(emptyElement.Value);
+        Assert.Empty(emptyElement.Elements());
     }
 }

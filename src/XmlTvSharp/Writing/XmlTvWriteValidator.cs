@@ -101,17 +101,6 @@ internal static class XmlTvWriteValidator
             ValidateCredits(programme.Credits);
         }
 
-        if (programme.Video is { } video)
-        {
-            RequireOptionalText(video.Aspect, "Programme video-aspect cannot be empty.");
-            RequireOptionalText(video.Quality, "Programme video-quality cannot be empty.");
-        }
-
-        if (programme.Audio is { } audio)
-        {
-            RequireOptionalText(audio.Stereo, "Programme audio-stereo cannot be empty.");
-        }
-
         foreach (var subtitles in programme.Subtitles)
         {
             ValidateSubtitles(subtitles);
@@ -214,14 +203,6 @@ internal static class XmlTvWriteValidator
     private static void RequireLocalizedText(XmlTvLocalizedText value, string message)
     {
         if (value.Value.Length == 0)
-        {
-            throw new XmlTvWriteException(message);
-        }
-    }
-
-    private static void RequireOptionalText(string? value, string message)
-    {
-        if (value is not null && string.IsNullOrWhiteSpace(value))
         {
             throw new XmlTvWriteException(message);
         }

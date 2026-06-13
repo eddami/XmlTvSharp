@@ -72,6 +72,28 @@ public sealed class XmlTvWriterDtdConformanceTests
         Assert.DoesNotContain("<live", output.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task WriteAsync_EmptyOptionalMediaText_ProducesDtdValidXmlTv()
+    {
+        var output = new StringWriter();
+        var document = new XmlTvDocument();
+        document.Programmes.Add(new XmlTvProgramme(
+            XmlTvDateTime.Parse("20260605120000 +0000"),
+            "channel-one.tv",
+            "Programme One")
+        {
+            Video = new XmlTvVideo(Aspect: "", Quality: ""),
+            Audio = new XmlTvAudio(Stereo: "")
+        });
+
+        await XmlTvWriter.WriteAsync(document, output, new XmlTvWriterOptions
+        {
+            OmitXmlDeclaration = true
+        }, TestContext.Current.CancellationToken);
+
+        ValidateAgainstXmlTvDtd(output.ToString());
+    }
+
     private static XmlTvDocument CreateFullStandardDocument()
     {
         var document = new XmlTvDocument(new XmlTvMetadata
