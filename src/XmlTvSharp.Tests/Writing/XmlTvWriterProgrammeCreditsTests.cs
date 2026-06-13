@@ -119,6 +119,29 @@ public sealed class XmlTvWriterProgrammeCreditsTests
     }
 
     [Fact]
+    public async Task WriteProgrammeAsync_EmptyCreditText_WritesMinimalCreditRoleElement()
+    {
+        var output = new StringWriter();
+        var credit = new XmlTvCredit();
+        credit.Content.Add(new XmlTvCreditText(""));
+        var programme = new XmlTvProgramme(XmlTvDateTime.Parse("20260605120000 +0000"), "channel-one", "Title")
+        {
+            Credits = new XmlTvCredits()
+        };
+        programme.Credits.Directors.Add(credit);
+        using var writer = new XmlTvWriter(output);
+
+        await writer.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await writer.WriteProgrammeAsync(programme, TestContext.Current.CancellationToken);
+        await writer.CompleteAsync(TestContext.Current.CancellationToken);
+
+        Assert.Contains("<director />", output.ToString(), StringComparison.Ordinal);
+        var director = Assert.Single(XDocument.Parse(output.ToString()).Root!.Element("programme")!
+            .Element("credits")!.Elements("director"));
+        Assert.Empty(director.Value);
+    }
+
+    [Fact]
     public async Task WriteProgrammeAsync_NullCreditItem_ThrowsXmlTvWriteExceptionBeforeEmittingProgramme()
     {
         var output = new StringWriter();

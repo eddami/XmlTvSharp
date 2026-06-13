@@ -58,8 +58,10 @@ internal sealed partial class XmlTvElementWriter
         {
             switch (item)
             {
-                case XmlTvCreditText text:
+                case XmlTvCreditText { Value.Length: > 0 } text:
                     await _writer.WriteStringAsync(text.Value).ConfigureAwait(false);
+                    break;
+                case XmlTvCreditText:
                     break;
                 case XmlTvCreditImage image:
                     await WriteImageAsync(image.Value).ConfigureAwait(false);
