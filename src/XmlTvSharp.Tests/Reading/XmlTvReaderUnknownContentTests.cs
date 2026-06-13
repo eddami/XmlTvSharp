@@ -25,7 +25,7 @@ public sealed class XmlTvReaderUnknownContentTests
     }
 
     [Fact]
-    public async Task ReadAsync_IgnoresUnknownXExtensionByDefault()
+    public async Task ReadAsync_DisallowsUnknownXExtensionElementByDefault()
     {
         const string xml = """
                            <tv>
@@ -36,7 +36,27 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
+        await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ReadAsync_IgnoresUnknownXExtensionElementWhenConfigured()
+    {
+        const string xml = """
+                           <tv>
+                             <x-provider>
+                               <channel id="ignored"><display-name>Ignored</display-name></channel>
+                             </x-provider>
+                             <channel id="one"><display-name>One</display-name></channel>
+                           </tv>
+                           """;
+        var options = new XmlTvReaderOptions
+        {
+            UnknownElementHandling = XmlTvUnknownContentHandling.Ignore
+        };
+
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
 
         Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
@@ -50,7 +70,8 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -62,7 +83,8 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -84,7 +106,7 @@ public sealed class XmlTvReaderUnknownContentTests
     }
 
     [Fact]
-    public async Task ReadAsync_IgnoresUnknownXExtensionAttributeByDefault()
+    public async Task ReadAsync_DisallowsUnknownXExtensionAttributeByDefault()
     {
         const string xml = """
                            <tv>
@@ -92,13 +114,12 @@ public sealed class XmlTvReaderUnknownContentTests
                            </tv>
                            """;
 
-        var document = await XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken);
-
-        Assert.Equal("one", Assert.Single(document.Channels).Id);
+        await Assert.ThrowsAsync<XmlTvReadException>(() =>
+            XmlTvReader.ReadAsync(new StringReader(xml), TestContext.Current.CancellationToken));
     }
 
     [Fact]
-    public async Task ReadAsync_DisallowsUnknownXExtensionAttributeWhenConfigured()
+    public async Task ReadAsync_IgnoresUnknownXExtensionAttributeWhenConfigured()
     {
         const string xml = """
                            <tv>
@@ -107,9 +128,11 @@ public sealed class XmlTvReaderUnknownContentTests
                            """;
         var options = new XmlTvReaderOptions
         {
-            XExtensionHandling = XmlTvUnknownContentHandling.Disallow
+            UnknownAttributeHandling = XmlTvUnknownContentHandling.Ignore
         };
 
-        await Assert.ThrowsAsync<XmlTvReadException>(() => XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken));
+        var document = await XmlTvReader.ReadAsync(new StringReader(xml), options, TestContext.Current.CancellationToken);
+
+        Assert.Equal("one", Assert.Single(document.Channels).Id);
     }
 }

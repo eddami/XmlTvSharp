@@ -110,7 +110,7 @@ internal sealed partial class XmlTvParser
 
                     return await ReadProgrammeAsync(cancellationToken).ConfigureAwait(false);
                 default:
-                    await HandleUnknownTopLevelElementAsync(cancellationToken).ConfigureAwait(false);
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Tv, cancellationToken).ConfigureAwait(false);
                     continue;
             }
         }

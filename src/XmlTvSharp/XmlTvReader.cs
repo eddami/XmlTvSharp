@@ -281,14 +281,6 @@ public sealed class XmlTvReader : IDisposable
                 "Unsupported unknown attribute handling behavior.");
         }
 
-        if (!Enum.IsDefined(typeof(XmlTvUnknownContentHandling), readerOptions.XExtensionHandling))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(options),
-                readerOptions.XExtensionHandling,
-                "Unsupported x-extension handling behavior.");
-        }
-
         return readerOptions;
     }
 }

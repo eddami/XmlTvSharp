@@ -105,7 +105,6 @@ internal static class XmlTvNames
         internal const string Seconds = "seconds";
         internal const string Still = "still";
         internal const string Teletext = "teletext";
-        internal const string XExtensionPrefix = "x-";
         internal const string Yes = "yes";
     }
 

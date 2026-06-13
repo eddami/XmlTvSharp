@@ -80,7 +80,7 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false));
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Credits, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Credits, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }
@@ -161,7 +161,7 @@ internal sealed partial class XmlTvParser
                     content.Add(new XmlTvCreditUrl(url));
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(elementName, cancellationToken).ConfigureAwait(false);
+                    await HandleUnknownElementAsync(elementName, cancellationToken).ConfigureAwait(false);
                     continue;
             }
         }
@@ -285,7 +285,7 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false);
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Video, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Video, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }
@@ -340,7 +340,7 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false);
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Audio, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Audio, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }
@@ -388,7 +388,7 @@ internal sealed partial class XmlTvParser
                         .ConfigureAwait(false);
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Subtitles, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Subtitles, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }
@@ -446,7 +446,7 @@ internal sealed partial class XmlTvParser
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Rating, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Rating, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }
@@ -523,7 +523,7 @@ internal sealed partial class XmlTvParser
                     await ReadEmptyElementTailAsync(XmlTvNames.Elements.Icon, cancellationToken).ConfigureAwait(false);
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.StarRating, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.StarRating, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }

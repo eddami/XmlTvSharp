@@ -709,7 +709,6 @@ public sealed class XmlTvReaderTests
     [InlineData("profile")]
     [InlineData("unknown-element")]
     [InlineData("unknown-attribute")]
-    [InlineData("x-extension")]
     public void Constructor_InvalidReaderOption_ThrowsArgumentOutOfRangeException(string option)
     {
         var options = option switch
@@ -722,13 +721,9 @@ public sealed class XmlTvReaderTests
             {
                 UnknownElementHandling = (XmlTvUnknownContentHandling)999
             },
-            "unknown-attribute" => new XmlTvReaderOptions
-            {
-                UnknownAttributeHandling = (XmlTvUnknownContentHandling)999
-            },
             _ => new XmlTvReaderOptions
             {
-                XExtensionHandling = (XmlTvUnknownContentHandling)999
+                UnknownAttributeHandling = (XmlTvUnknownContentHandling)999
             }
         };
 

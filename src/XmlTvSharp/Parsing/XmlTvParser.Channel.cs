@@ -59,7 +59,7 @@ internal sealed partial class XmlTvParser
                     (urls ??= []).Add(await ReadUrlAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Channel, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Channel, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }

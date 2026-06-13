@@ -208,7 +208,7 @@ internal sealed partial class XmlTvParser
                     (images ??= []).Add(await ReadImageAsync(cancellationToken).ConfigureAwait(false));
                     continue;
                 default:
-                    await HandleUnknownNestedElementAsync(XmlTvNames.Elements.Programme, cancellationToken)
+                    await HandleUnknownElementAsync(XmlTvNames.Elements.Programme, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
             }

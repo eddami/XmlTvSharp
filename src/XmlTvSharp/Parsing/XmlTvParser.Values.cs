@@ -39,7 +39,7 @@ internal sealed partial class XmlTvParser
                 continue;
             }
 
-            if (ShouldIgnoreUnknownAttribute(_reader.Name))
+            if (_options.UnknownAttributeHandling == XmlTvUnknownContentHandling.Ignore)
             {
                 continue;
             }
